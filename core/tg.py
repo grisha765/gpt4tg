@@ -1,4 +1,4 @@
-import string, random
+import string, random, asyncio
 from config.config import Config
 from pyrogram import Client, filters #type: ignore
 from func.jsondb import load_database, save_database
@@ -15,6 +15,9 @@ def is_activated(_, __, message):
     return str(chat_id) in activated_groups and activated_groups[str(chat_id)]["activated"]
 
 activated_filter = filters.create(is_activated)
+
+queues = {}
+processing_tasks = {}
 
 async def generate_password(chat_id):
     if str(chat_id) not in activated_groups:
@@ -58,16 +61,44 @@ async def handle_activate_group(_, message):
     else:
         await app.send_message(chat_id, "Invalid password. Try again.")
 
+async def process_queue(chat_id):
+    while not queues[chat_id].empty():
+        request = await queues[chat_id].get()
+        message = request['message']
+        query = request['query']
+
+        try:
+            await message.edit_text("Generating...")
+            response = await gpt_request(query)
+            await message.edit_text(response)
+        except Exception as e:
+            logging.error(f"Error processing /gpt request: {e}")
+            await message.edit_text("An error occurred while processing your request.")
+
+    del processing_tasks[chat_id]
+
 @app.on_message(filters.command("gpt") & activated_filter)
 async def handle_request(_, message):
     text = message.text.split(maxsplit=1)
-    if len(text) > 1:
-        query = text[1]
-    else:
-        await message.reply("Please enter text after the /gpt query.")
+    if len(text) <= 1:
+        await message.reply("Please enter text after the /gpt command. Example: /gpt Tell me a joke.")
         return
-    response = await gpt_request(query)
-    await message.reply(response)
+
+    query = text[1]
+    chat_id = message.chat.id
+
+    if chat_id not in queues:
+        queues[chat_id] = asyncio.Queue()
+
+    queue = queues[chat_id]
+    position = queue.qsize() + 1
+
+    reply_message = await message.reply(f"Your request is in the queue. Position: {position}")
+
+    await queue.put({'query': query, 'message': reply_message})
+
+    if chat_id not in processing_tasks:
+        processing_tasks[chat_id] = asyncio.create_task(process_queue(chat_id))
 
 async def start_bot():
     logging.info("Launching the bot...")
