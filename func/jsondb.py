@@ -3,13 +3,13 @@ from config.config import Config
 
 def load_database():
     try:
-        with open(Config.db_file, "r") as file:
+        with open(Config.db_path, "r") as file:
             return json.load(file)
     except FileNotFoundError:
         return {}
 
 def save_database(database):
-    with open(Config.db_file, "w") as file:
+    with open(Config.db_path, "w") as file:
         json.dump(database, file, indent=4)
 
 if __name__ == "__main__":
