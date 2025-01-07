@@ -129,7 +129,6 @@ async def handle_request(_, message):
 
 @app.on_message(activated_filter & filters.reply & ~filters.command("gpt"))
 async def handle_reply(_, message):
-    logging.debug(f"Conversations: {conversations}, conv_map: {conv_map}")
     if not message.reply_to_message:
         return
     mid = message.reply_to_message.id
