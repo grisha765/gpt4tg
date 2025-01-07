@@ -1,4 +1,4 @@
-import string, random, asyncio
+import string, random, asyncio, re
 from config.config import Config
 from pyrogram import Client, filters #type: ignore
 from func.jsondb import load_database, save_database
@@ -23,7 +23,7 @@ conv_map = {}
 
 def build_history(conv):
     text = "Chat History:\n"
-    for role, content in conv:
+    for role, content in conv["history"]:
         text += f"{role}: {content}\n"
     return text
 
@@ -73,20 +73,21 @@ async def process_queue(chat_id):
     while not queues[chat_id].empty():
         req = await queues[chat_id].get()
         msg = req['message']
-        q = req['query']
+        query = req['query']
         cid = req['conv_id']
         user_role = req['user_role']
         try:
             await msg.edit_text("Generating...")
             h = build_history(conversations[cid])
             logging.debug(f"Format history: {h}")
-            r = await gpt_request(q, user_role, history=h)
-            conversations[cid].append((user_role, q))
-            if len(conversations[cid]) > 10:
-                conversations[cid].pop(0)
-            conversations[cid].append(("bot", r))
-            if len(conversations[cid]) > 10:
-                conversations[cid].pop(0)
+            system_prompt = conversations[cid].get("system_prompt", "")
+            r = await gpt_request(query, user_role, history=h, systemprompt=system_prompt)
+            conversations[cid]["history"].append((user_role, query))
+            if len(conversations[cid]["history"]) > 10:
+                conversations[cid]["history"].pop(0)
+            conversations[cid]["history"].append(("bot", r))
+            if len(conversations[cid]["history"]) > 10:
+                conversations[cid]["history"].pop(0)
             await msg.edit_text(r)
             conv_map[msg.id] = cid
         except Exception as e:
@@ -96,15 +97,21 @@ async def process_queue(chat_id):
 
 @app.on_message(filters.command("gpt") & activated_filter)
 async def handle_request(_, message):
-    text = message.text.split(maxsplit=1)
-    if len(text) <= 1:
+    msg = message.text.split(maxsplit=1)
+    if len(msg) <= 1:
         await message.reply("Please enter text after the /gpt command. Example: /gpt Tell me a joke.")
         return
-    query = text[1]
+    system_prompt, query = "", msg[1]
+    m = re.match(r'^"([^"]+)"(.*)$', query)
+    if m:
+        system_prompt = m.group(1).strip()
+        query = m.group(2).strip() if m.group(2) else ""
     chat_id = message.chat.id
     conv_id = f"{chat_id}_{message.id}"
     if conv_id not in conversations:
-        conversations[conv_id] = []
+        conversations[conv_id] = {"system_prompt": system_prompt, "history": []}
+    if not conversations[conv_id].get("system_prompt"):
+        conversations[conv_id]["system_prompt"] = system_prompt
     if chat_id not in queues:
         queues[chat_id] = asyncio.Queue()
     queue = queues[chat_id]
@@ -130,7 +137,7 @@ async def handle_reply(_, message):
         return
     chat_id = message.chat.id
     conv_id = conv_map[mid]
-    q = message.text
+    query = message.text
     if chat_id not in queues:
         queues[chat_id] = asyncio.Queue()
     queue = queues[chat_id]
@@ -142,7 +149,7 @@ async def handle_reply(_, message):
         user = username
     else:
         user = message.from_user.first_name
-    await queue.put({'query': q, 'message': reply_message, 'conv_id': conv_id, 'user_role': user})
+    await queue.put({'query': query, 'message': reply_message, 'conv_id': conv_id, 'user_role': user})
     if chat_id not in processing_tasks:
         processing_tasks[chat_id] = asyncio.create_task(process_queue(chat_id))
 

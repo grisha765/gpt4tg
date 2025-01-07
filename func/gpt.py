@@ -3,23 +3,32 @@ from config.config import Config
 from config import logging_config
 logging = logging_config.setup_logging(__name__)
 
-async def gpt_request(text, username, history):
+async def gpt_request(text, username, history, systemprompt):
     logging.debug(f"GPT Request: {text}")
+    logging.debug(f"GPT Chat History: {history}")
     url = f"http://{Config.api_ip}:{Config.api_port}/v1/chat/completions"
     headers = {
         "Content-Type": "application/json"
     }
+    messages = []
+    if systemprompt:
+        logging.debug(f"GPT Prompt: {systemprompt}")
+        messages.append({
+            "role": "system",
+            "content": systemprompt
+        })
+
+    messages.append({
+        "role": "history",
+        "content": history
+    })
+    messages.append({
+        "role": username,
+        "content": text
+    })
+
     payload = {
-        "messages": [
-            {
-              "content": history,
-              "role": "system"
-            },
-            {
-                "role": username,
-                "content": text
-            }
-        ],
+        "messages": messages,
         "model": Config.gpt_model,
         "provider": Config.gpt_provider
     }
