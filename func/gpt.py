@@ -3,7 +3,7 @@ from config.config import Config
 from config import logging_config
 logging = logging_config.setup_logging(__name__)
 
-async def gpt_request(text):
+async def gpt_request(text, history):
     logging.debug(f"GPT Request: {text}")
     url = f"http://{Config.api_ip}:{Config.api_port}/v1/chat/completions"
     headers = {
@@ -11,6 +11,10 @@ async def gpt_request(text):
     }
     payload = {
         "messages": [
+            {
+              "content": history,
+              "role": "system"
+            },
             {
                 "role": "user",
                 "content": text

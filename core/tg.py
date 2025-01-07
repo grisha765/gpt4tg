@@ -18,6 +18,14 @@ activated_filter = filters.create(is_activated)
 
 queues = {}
 processing_tasks = {}
+conversations = {}
+conv_map = {}
+
+def build_history(conv):
+    text = "Chat History:\n"
+    for role, content in conv:
+        text += f"{role}: {content}\n"
+    return text
 
 async def generate_password(chat_id):
     if str(chat_id) not in activated_groups:
@@ -63,18 +71,23 @@ async def handle_activate_group(_, message):
 
 async def process_queue(chat_id):
     while not queues[chat_id].empty():
-        request = await queues[chat_id].get()
-        message = request['message']
-        query = request['query']
-
+        req = await queues[chat_id].get()
+        msg = req['message']
+        q = req['query']
+        cid = req['conv_id']
+        user_role = req['user_role']
         try:
-            await message.edit_text("Generating...")
-            response = await gpt_request(query)
-            await message.edit_text(response)
+            await msg.edit_text("Generating...")
+            conversations[cid].append((user_role, q))
+            h = build_history(conversations[cid])
+            logging.debug(f"Format history: {h}")
+            r = await gpt_request(q, history=h)
+            conversations[cid].append(("bot", r))
+            await msg.edit_text(r)
+            conv_map[msg.id] = cid
         except Exception as e:
-            logging.error(f"Error processing /gpt request: {e}")
-            await message.edit_text("An error occurred while processing your request.")
-
+            logging.error(f"Error processing GPT request: {e}")
+            await msg.edit_text("An error occurred while processing your request.")
     del processing_tasks[chat_id]
 
 @app.on_message(filters.command("gpt") & activated_filter)
@@ -83,20 +96,41 @@ async def handle_request(_, message):
     if len(text) <= 1:
         await message.reply("Please enter text after the /gpt command. Example: /gpt Tell me a joke.")
         return
-
     query = text[1]
     chat_id = message.chat.id
-
+    conv_id = f"{chat_id}_{message.id}"
+    logging.debug(f"Initializing conversation: {conv_id} with user query: {query}")
+    if conv_id not in conversations:
+        conversations[conv_id] = []
     if chat_id not in queues:
         queues[chat_id] = asyncio.Queue()
-
     queue = queues[chat_id]
-    position = queue.qsize() + 1
+    pos = queue.qsize() + 1
+    reply_message = await message.reply(f"Your request is in the queue. Position: {pos}")
+    conv_map[reply_message.id] = conv_id
+    await queue.put({'query': query, 'message': reply_message, 'conv_id': conv_id, 'user_role': 'user'})
+    if chat_id not in processing_tasks:
+        processing_tasks[chat_id] = asyncio.create_task(process_queue(chat_id))
 
-    reply_message = await message.reply(f"Your request is in the queue. Position: {position}")
-
-    await queue.put({'query': query, 'message': reply_message})
-
+@app.on_message(activated_filter & filters.reply & ~filters.command("gpt"))
+async def handle_reply(_, message):
+    logging.debug(f"Conversations: {conversations}, conv_map: {conv_map}")
+    if not message.reply_to_message:
+        return
+    mid = message.reply_to_message.id
+    if mid not in conv_map:
+        return
+    chat_id = message.chat.id
+    conv_id = conv_map[mid]
+    q = message.text
+    logging.debug(f"Continuing conversation: {conv_id} with user query: {q}")
+    if chat_id not in queues:
+        queues[chat_id] = asyncio.Queue()
+    queue = queues[chat_id]
+    pos = queue.qsize() + 1
+    reply_message = await message.reply(f"Your request is in the queue. Position: {pos}")
+    conv_map[reply_message.id] = conv_id
+    await queue.put({'query': q, 'message': reply_message, 'conv_id': conv_id, 'user_role': 'user'})
     if chat_id not in processing_tasks:
         processing_tasks[chat_id] = asyncio.create_task(process_queue(chat_id))
 
