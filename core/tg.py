@@ -78,11 +78,15 @@ async def process_queue(chat_id):
         user_role = req['user_role']
         try:
             await msg.edit_text("Generating...")
-            conversations[cid].append((user_role, q))
             h = build_history(conversations[cid])
             logging.debug(f"Format history: {h}")
             r = await gpt_request(q, history=h)
+            conversations[cid].append((user_role, q))
+            if len(conversations[cid]) > 10:
+                conversations[cid].pop(0)
             conversations[cid].append(("bot", r))
+            if len(conversations[cid]) > 10:
+                conversations[cid].pop(0)
             await msg.edit_text(r)
             conv_map[msg.id] = cid
         except Exception as e:
@@ -99,7 +103,6 @@ async def handle_request(_, message):
     query = text[1]
     chat_id = message.chat.id
     conv_id = f"{chat_id}_{message.id}"
-    logging.debug(f"Initializing conversation: {conv_id} with user query: {query}")
     if conv_id not in conversations:
         conversations[conv_id] = []
     if chat_id not in queues:
@@ -123,7 +126,6 @@ async def handle_reply(_, message):
     chat_id = message.chat.id
     conv_id = conv_map[mid]
     q = message.text
-    logging.debug(f"Continuing conversation: {conv_id} with user query: {q}")
     if chat_id not in queues:
         queues[chat_id] = asyncio.Queue()
     queue = queues[chat_id]
