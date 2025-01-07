@@ -78,12 +78,12 @@ async def process_queue(chat_id):
         user_role = req['user_role']
         try:
             await msg.edit_text("Generating...")
-            h = build_history(conversations[cid])
-            logging.debug(f"Format history: {h}")
-            r = await gpt_request(q, history=h)
             conversations[cid].append((user_role, q))
             if len(conversations[cid]) > 10:
                 conversations[cid].pop(0)
+            h = build_history(conversations[cid])
+            logging.debug(f"Format history: {h}")
+            r = await gpt_request(q, history=h)
             conversations[cid].append(("bot", r))
             if len(conversations[cid]) > 10:
                 conversations[cid].pop(0)
@@ -111,7 +111,12 @@ async def handle_request(_, message):
     pos = queue.qsize() + 1
     reply_message = await message.reply(f"Your request is in the queue. Position: {pos}")
     conv_map[reply_message.id] = conv_id
-    await queue.put({'query': query, 'message': reply_message, 'conv_id': conv_id, 'user_role': 'user'})
+    username = message.from_user.username
+    if username:
+        user = username
+    else:
+        user = message.from_user.first_name
+    await queue.put({'query': query, 'message': reply_message, 'conv_id': conv_id, 'user_role': user})
     if chat_id not in processing_tasks:
         processing_tasks[chat_id] = asyncio.create_task(process_queue(chat_id))
 
@@ -132,7 +137,12 @@ async def handle_reply(_, message):
     pos = queue.qsize() + 1
     reply_message = await message.reply(f"Your request is in the queue. Position: {pos}")
     conv_map[reply_message.id] = conv_id
-    await queue.put({'query': q, 'message': reply_message, 'conv_id': conv_id, 'user_role': 'user'})
+    username = message.from_user.username
+    if username:
+        user = username
+    else:
+        user = message.from_user.first_name
+    await queue.put({'query': q, 'message': reply_message, 'conv_id': conv_id, 'user_role': user})
     if chat_id not in processing_tasks:
         processing_tasks[chat_id] = asyncio.create_task(process_queue(chat_id))
 
