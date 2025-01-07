@@ -78,12 +78,12 @@ async def process_queue(chat_id):
         user_role = req['user_role']
         try:
             await msg.edit_text("Generating...")
+            h = build_history(conversations[cid])
+            logging.debug(f"Format history: {h}")
+            r = await gpt_request(q, user_role, history=h)
             conversations[cid].append((user_role, q))
             if len(conversations[cid]) > 10:
                 conversations[cid].pop(0)
-            h = build_history(conversations[cid])
-            logging.debug(f"Format history: {h}")
-            r = await gpt_request(q, history=h)
             conversations[cid].append(("bot", r))
             if len(conversations[cid]) > 10:
                 conversations[cid].pop(0)
