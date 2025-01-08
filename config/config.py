@@ -10,6 +10,7 @@ class Config:
     api_port: str = '1337'
     gpt_model: str = 'gpt-4o-mini'
     gpt_provider: str = 'DDG'
+    gpt_tokens: int = 512
 
     @classmethod
     def load_from_env(cls):

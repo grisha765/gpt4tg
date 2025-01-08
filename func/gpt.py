@@ -32,7 +32,7 @@ async def gpt_request(text, username, history, systemprompt):
         "model": Config.gpt_model,
         "provider": Config.gpt_provider,
         "stop": ["#####"],
-        "max_tokens": 1024
+        "max_tokens": Config.gpt_tokens
     }
 
     max_retries = 3
