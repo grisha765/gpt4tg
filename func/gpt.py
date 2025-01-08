@@ -15,7 +15,7 @@ async def gpt_request(text, username, history, systemprompt):
     logging.debug(f"GPT Prompt: {systemprompt}")
     messages.append({
         "role": "system",
-        "content": f"In this chat, the user marks his nickname before the colon. For example, if a user writes: '{username}: Hello! then '{username}' is a nickname, and 'Hello!' - the message itself.\n{systemprompt}"
+        "content": f"In this chat, the user marks his nickname before the colon. For example, if a user writes: '{username}: Hello! then '{username}' is a nickname, and 'Hello!' - the message itself. You don't have to write this nickname at the beginning.\n{systemprompt}"
     })
 
     for user_text, message_text in history:
