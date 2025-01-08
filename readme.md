@@ -33,6 +33,7 @@ python3 -m venv .venv
     GPT_MODEL="gpt-4o-mini"
     GPT_PROVIDER="DDG"
     GPT_TOKENS="512"
+    GPT_TEMPERATURE="0.5"
     ```
 
 #### Container

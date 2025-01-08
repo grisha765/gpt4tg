@@ -11,6 +11,7 @@ class Config:
     gpt_model: str = 'gpt-4o-mini'
     gpt_provider: str = 'DDG'
     gpt_tokens: int = 512
+    gpt_temperature: float = 0.5
 
     @classmethod
     def load_from_env(cls):
@@ -20,6 +21,8 @@ class Config:
                 current_value = getattr(cls, key)
                 if isinstance(current_value, int):
                     setattr(cls, key, int(env_value))
+                elif isinstance(current_value, float):
+                    setattr(cls, key, float(env_value))
                 elif isinstance(current_value, list):
                     setattr(cls, key, env_value.split(","))
                 else:
