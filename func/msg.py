@@ -9,12 +9,6 @@ processing_tasks = {}
 conversations = {}
 conv_map = {}
 
-def build_history(conv):
-    text = "Chat History:\n"
-    for role, content in conv["history"]:
-        text += f"{role}: {content}\n"
-    return text
-
 async def gen_typing(app, chat_id, typing_task):
     async def cycle():
         while True:
@@ -40,17 +34,15 @@ async def process_queue(app, chat_id):
         user_role = req['user_role']
         typing_task = await gen_typing(app, chat_id, True)
         try:
-            h = build_history(conversations[cid])
-            logging.debug(f"Format history: {h}")
             system_prompt = conversations[cid].get("system_prompt", "")
-            r = await gpt_request(query, user_role, history=h, systemprompt=system_prompt)
+            r = await gpt_request(query, user_role, history=conversations[cid]["history"], systemprompt=system_prompt)
             conversations[cid]["history"].append((user_role, query))
             if len(conversations[cid]["history"]) > 10:
                 conversations[cid]["history"].pop(0)
             conversations[cid]["history"].append(("bot", r))
             if len(conversations[cid]["history"]) > 10:
                 conversations[cid]["history"].pop(0)
-            r_msg = await msg.reply(r[:4096])
+            r_msg = await msg.reply(r[:4096]) #type: ignore
             conv_map[r_msg.id] = cid
         except Exception as e:
             logging.error(f"Error processing GPT request: {e}")

@@ -11,21 +11,31 @@ async def gpt_request(text, username, history, systemprompt):
         "Content-Type": "application/json"
     }
     messages = []
-    if systemprompt:
-        logging.debug(f"GPT Prompt: {systemprompt}")
-        messages.append({
-            "role": "system",
-            "content": systemprompt
-        })
+    #if systemprompt:
+    logging.debug(f"GPT Prompt: {systemprompt}")
+    messages.append({
+        "role": "system",
+        "content": f"In this chat, the user marks his nickname before the colon. For example, if a user writes: '{username}: Hello! then '{username}' is a nickname, and 'Hello!' - the message itself.\n{systemprompt}"
+    })
+
+    for user_text, message_text in history:
+        if user_text == 'bot':
+            messages.append({
+                "role": "assistant",
+                "content": message_text
+            })
+        else:
+            messages.append({
+                "role": "user",
+                "content": f"{user_text}: {message_text}"
+            })
 
     messages.append({
-        "role": "history",
-        "content": history
+        "role": "user",
+        "content": f"{username}: {text}"
     })
-    messages.append({
-        "role": username,
-        "content": text
-    })
+
+    logging.debug(f"Messages tuples: {messages}")
 
     payload = {
         "messages": messages,
