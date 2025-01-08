@@ -1,5 +1,6 @@
 import asyncio, re
 from func.gpt import gpt_request
+from pyrogram.enums import ChatAction
 from config import logging_config
 logging = logging_config.setup_logging(__name__)
 
@@ -14,15 +15,31 @@ def build_history(conv):
         text += f"{role}: {content}\n"
     return text
 
-async def process_queue(chat_id):
+async def gen_typing(app, chat_id, typing_task):
+    async def cycle():
+        while True:
+            await app.send_chat_action(chat_id, ChatAction.TYPING)
+            await asyncio.sleep(4)
+    if typing_task == True:
+        typing_task = asyncio.create_task(cycle())
+        return typing_task
+    else:
+        typing_task.cancel()
+        await app.send_chat_action(chat_id, ChatAction.CANCEL)
+        try:
+            await typing_task
+        except asyncio.CancelledError:
+            pass
+
+async def process_queue(app, chat_id):
     while not queues[chat_id].empty():
         req = await queues[chat_id].get()
         msg = req['message']
         query = req['query']
         cid = req['conv_id']
         user_role = req['user_role']
+        typing_task = await gen_typing(app, chat_id, True)
         try:
-            await msg.edit_text("Generating...")
             h = build_history(conversations[cid])
             logging.debug(f"Format history: {h}")
             system_prompt = conversations[cid].get("system_prompt", "")
@@ -33,14 +50,19 @@ async def process_queue(chat_id):
             conversations[cid]["history"].append(("bot", r))
             if len(conversations[cid]["history"]) > 10:
                 conversations[cid]["history"].pop(0)
-            await msg.edit_text(r)
-            conv_map[msg.id] = cid
+            r_msg = await msg.reply(r)
+            conv_map[r_msg.id] = cid
         except Exception as e:
             logging.error(f"Error processing GPT request: {e}")
-            await msg.edit_text("An error occurred while processing your request.")
+            await msg.reply("An error occurred while processing your request.")
+        finally:
+            await gen_typing(app, chat_id, typing_task)
+
     del processing_tasks[chat_id]
 
-async def request(message, text):
+async def request(app, message, text):
+    #logging.debug(f"conv map: {conv_map}")
+    #logging.debug(f"conversations: {conversations}")
     if len(text) <= 1:
         await message.reply("Please enter text after the /gpt command. Example: /gpt Tell me a joke.")
         return
@@ -59,18 +81,19 @@ async def request(message, text):
         queues[chat_id] = asyncio.Queue()
     queue = queues[chat_id]
     pos = queue.qsize() + 1
-    reply_message = await message.reply(f"Your request is in the queue. Position: {pos}")
-    conv_map[reply_message.id] = conv_id
+    logging.debug(f"{chat_id}: request is in the queue. Position: {pos}")
     username = message.from_user.username
     if username:
         user = username
     else:
         user = message.from_user.first_name
-    await queue.put({'query': query, 'message': reply_message, 'conv_id': conv_id, 'user_role': user})
+    await queue.put({'query': query, 'message': message, 'conv_id': conv_id, 'user_role': user})
     if chat_id not in processing_tasks:
-        processing_tasks[chat_id] = asyncio.create_task(process_queue(chat_id))
+        processing_tasks[chat_id] = asyncio.create_task(process_queue(app, chat_id))
 
-async def request_reply(message, text):
+async def request_reply(app, message, text):
+    #logging.debug(f"reply conv map: {conv_map}")
+    #logging.debug(f"reply conversations: {conversations}")
     if not message.reply_to_message:
         return
     mid = message.reply_to_message.id
@@ -82,16 +105,15 @@ async def request_reply(message, text):
         queues[chat_id] = asyncio.Queue()
     queue = queues[chat_id]
     pos = queue.qsize() + 1
-    reply_message = await message.reply(f"Your request is in the queue. Position: {pos}")
-    conv_map[reply_message.id] = conv_id
+    logging.debug(f"{chat_id}: request is in the queue. Position: {pos}")
     username = message.from_user.username
     if username:
         user = username
     else:
         user = message.from_user.first_name
-    await queue.put({'query': text, 'message': reply_message, 'conv_id': conv_id, 'user_role': user})
+    await queue.put({'query': text, 'message': message, 'conv_id': conv_id, 'user_role': user})
     if chat_id not in processing_tasks:
-        processing_tasks[chat_id] = asyncio.create_task(process_queue(chat_id))
+        processing_tasks[chat_id] = asyncio.create_task(process_queue(app, chat_id))
 
 if __name__ == "__main__":
     raise RuntimeError("This module should be run only via main.py")

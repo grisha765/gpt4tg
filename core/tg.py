@@ -25,12 +25,12 @@ async def handle_activate_group(_, message):
 @app.on_message(filters.command("gpt") & activated_filter)
 async def handle_request(_, message):
     text = message.text.split(maxsplit=1)
-    await request(message, text)
+    await request(app, message, text)
 
 @app.on_message(activated_filter & filters.reply & ~filters.command("gpt"))
 async def handle_reply(_, message):
     text = message.text
-    await request_reply(message, text)
+    await request_reply(app, message, text)
 
 async def start_bot():
     logging.info("Launching the bot...")
