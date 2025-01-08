@@ -32,6 +32,7 @@ python3 -m venv .venv
     API_PORT="1337"
     GPT_MODEL="gpt-4o-mini"
     GPT_PROVIDER="DDG"
+    GPT_TOKENS="512"
     ```
 
 #### Container
