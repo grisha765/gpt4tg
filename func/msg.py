@@ -1,6 +1,6 @@
 import asyncio, re
 from func.gpt import gpt_request
-from pyrogram.enums import ChatAction
+from pyrogram.enums import ChatAction, ParseMode
 from config import logging_config
 logging = logging_config.setup_logging(__name__)
 
@@ -64,7 +64,10 @@ async def request(app, message, text):
     #logging.debug(f"conv map: {conv_map}")
     #logging.debug(f"conversations: {conversations}")
     if len(text) <= 1:
-        await message.reply("Please enter text after the /gpt command. Example: /gpt Tell me a joke.")
+        await message.reply(
+            'Please enter text after the /gpt command. Example: \n<code>/gpt "prompt optional" Tell me a joke.</code>',
+            parse_mode=ParseMode.HTML
+        )
         return
     system_prompt, query = "", text[1]
     m = re.match(r'^"([^"]+)"(.*)$', query)
