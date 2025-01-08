@@ -10,8 +10,10 @@ class Config:
     api_port: str = '1337'
     gpt_model: str = 'gpt-4o-mini'
     gpt_provider: str = 'DDG'
-    gpt_tokens: int = 512
-    gpt_temperature: float = 0.5
+    gpt_tokens: int = 1024
+    gpt_temperature: float = 0.7
+    genai_api: str = ""
+    genai_model: str = "gemini-2.0-flash-exp"
 
     @classmethod
     def load_from_env(cls):
