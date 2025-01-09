@@ -10,5 +10,6 @@ pyaes==1.6.1
 pymediainfo-pyrofork==6.0.2
 pyrofork==2.3.54
 PySocks==1.7.1
+python-magic==0.4.27
 TgCrypto==1.2.5
 yarl==1.18.3
