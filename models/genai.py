@@ -1,4 +1,4 @@
-import aiohttp, asyncio
+import aiohttp, asyncio, base64, os, magic
 from config.config import Config
 from config import logging_config
 logging = logging_config.setup_logging(__name__)
@@ -31,13 +31,34 @@ async def gpt_request(text, username, history, systemprompt):
                 "role": "user",
                 "parts": [{"text": f"{user_text}: {message_text}"}]
             })
-
-    messages.append({
-        "role": "user",
-        "parts": [{"text": f"{username}: {text}"}]
-    })
-
-    logging.debug(f"Messages tuples: {messages}")
+    if text.startswith("Send image: "):
+        parts = text.split("Send image: ")[1].split(" text: ")
+        filename = parts[0]
+        text = parts[1]
+        mime = magic.Magic(mime=True)
+        mime_type = mime.from_file(filename)
+        if os.path.isfile(filename):
+            with open(filename, "rb") as img_file:
+                encoded_image = base64.b64encode(img_file.read()).decode("utf-8")
+            messages.append({
+                "role": "user",
+                "parts": [
+                    {"text": f"{username}: {text}"},
+                    {"inline_data": {"mime_type": mime_type, "data": encoded_image}}
+                          ]
+            })
+        else:
+            messages.append({
+                "role": "user",
+                "parts": [{"text": f"{username}: {text}"}]
+            })
+            logging.debug(f"Messages tuples: {messages}")
+    else:
+        messages.append({
+            "role": "user",
+            "parts": [{"text": f"{username}: {text}"}]
+        })
+        logging.debug(f"Messages tuples: {messages}")
 
     safety_settings = []
     for safety_setting in ["HARM_CATEGORY_SEXUALLY_EXPLICIT", "HARM_CATEGORY_HATE_SPEECH",

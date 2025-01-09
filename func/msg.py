@@ -1,4 +1,4 @@
-import asyncio, re
+import asyncio, re, tempfile, os
 from pyrogram.enums import ChatAction, ParseMode
 from config import logging_config
 logging = logging_config.setup_logging(__name__)
@@ -36,6 +36,12 @@ async def process_queue(app, chat_id, genai=False):
             system_prompt = conversations[cid].get("system_prompt", "")
             if genai:
                 from models.genai import gpt_request
+                if msg.photo or msg.animation or msg.sticker:
+                    caption = msg.caption if msg.caption else "None"
+                    temp_file = tempfile.NamedTemporaryFile(delete=False)
+                    logging.debug(f"{cid}: download media file")
+                    await msg.download(temp_file.name)
+                    query = f"Send image: {temp_file.name}" + f" text: {caption}"
             else:
                 from models.gpt import gpt_request
             r = await gpt_request(query, user_role, history=conversations[cid]["history"], systemprompt=system_prompt)
@@ -52,6 +58,11 @@ async def process_queue(app, chat_id, genai=False):
             await msg.reply("Error sending final message.")
         finally:
             await gen_typing(app, chat_id, typing_task)
+            if genai:
+                if msg.photo or msg.animation or msg.sticker:
+                    logging.debug(f"{cid}: remove media file")
+                    temp_file.close()
+                    os.remove(temp_file.name)
 
     del processing_tasks[chat_id]
 
