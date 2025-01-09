@@ -13,7 +13,6 @@ class Config:
     gpt_tokens: int = 1024
     gpt_temperature: float = 0.7
     genai_api: str = ""
-    genai_model: str = "gemini-2.0-flash-exp"
 
     @classmethod
     def load_from_env(cls):

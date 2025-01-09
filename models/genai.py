@@ -9,7 +9,8 @@ async def gpt_request(text, username, history, systemprompt):
     logging.debug(f"GPT Request: {text}")
     logging.debug(f"GPT Chat History: {history}")
 
-    model_name = Config.genai_model
+    model_name = Config.gpt_model
+
     with open('config/prompt.txt', 'r', encoding='utf-8') as file:
         txt_prompt = file.read()
     
