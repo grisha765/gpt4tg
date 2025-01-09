@@ -47,7 +47,7 @@ python3 -m venv .venv
 - Run bot:
     ```bash
     mkdir -p $HOME/database/ && \
-    podman run -d \
+    podman run --tmpfs /tmp -d \
     --name gpt4tg \
     -v $HOME/database:/app/database:z \
     -e TG_TOKEN="your_telegram_bot_token" \
