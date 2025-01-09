@@ -30,8 +30,9 @@ python3 -m venv .venv
     DB_PATH="data.json"
     API_IP="127.0.0.1"
     API_PORT="1337"
-    GPT_MODEL="gpt-4o-mini"
-    GPT_PROVIDER="DDG"
+    GENAI_API="your_gemini_api_key" # if not empty then gemini is activated
+    GPT_MODEL="gpt-4o-mini" # also set for gemini
+    GPT_PROVIDER="DDG" # only works in gpt4free or ollama
     GPT_TOKENS="512"
     GPT_TEMPERATURE="0.5"
     ```
@@ -76,7 +77,7 @@ python3 -m venv .venv
 ## Features
 
 - Handles group chat `activations` with a `password` system.
-- Supports `OpenAI API` responses for user queries.
+- Supports `OpenAI API` and `Gemini API` responses for user queries.
 - `Queue-based` message handling to process requests efficiently.
 - Chat history maintained for context in `conversations`.
 - `Configurable` through environment variables.
