@@ -49,7 +49,7 @@ async def process_queue(app, chat_id, genai=False):
             conv_map[r_msg.id] = cid
         except Exception as e:
             logging.error(f"Error processing GPT request: {e}")
-            await msg.reply("An error occurred while processing your request.")
+            await msg.reply("Error sending final message.")
         finally:
             await gen_typing(app, chat_id, typing_task)
 
