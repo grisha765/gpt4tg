@@ -8,10 +8,12 @@ prompt = ""
 async def gpt_request(text, username, history, systemprompt):
     logging.debug(f"GPT Request: {text}")
     logging.debug(f"GPT Chat History: {history}")
+
+    model_name = Config.genai_model
     with open('config/prompt.txt', 'r', encoding='utf-8') as file:
         txt_prompt = file.read()
     
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{Config.genai_model}:generateContent?key={Config.genai_api}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={Config.genai_api}"
     headers = {
         "Content-Type": "application/json"
     }
@@ -36,16 +38,24 @@ async def gpt_request(text, username, history, systemprompt):
 
     logging.debug(f"Messages tuples: {messages}")
 
+    safety_settings = []
+    for safety_setting in ["HARM_CATEGORY_SEXUALLY_EXPLICIT", "HARM_CATEGORY_HATE_SPEECH",
+                           "HARM_CATEGORY_HARASSMENT", "HARM_CATEGORY_DANGEROUS_CONTENT",
+                           "HARM_CATEGORY_CIVIC_INTEGRITY"]:
+        if "2.0" in model_name and "flash" in model_name:
+            threshold = "OFF"
+        else:
+            threshold = "BLOCK_NONE"
+
+        safety_settings.append({
+            "category": safety_setting,
+            "threshold": threshold
+        })
+
     payload = {
         "system_instruction": { "parts": { "text": f"{txt_prompt}\n{systemprompt}"}},
 
-        "safetySettings": [
-            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
-            {"category": "HARM_CATEGORY_CIVIC_INTEGRITY", "threshold": "BLOCK_NONE"}
-        ],
+        "safetySettings": safety_settings,
 
         "contents": messages,
         "generationConfig": {
