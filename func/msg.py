@@ -35,9 +35,9 @@ async def process_queue(app, chat_id, genai=False):
         try:
             system_prompt = conversations[cid].get("system_prompt", "")
             if genai:
-                from func.genai import gpt_request
+                from models.genai import gpt_request
             else:
-                from func.gpt import gpt_request
+                from models.gpt import gpt_request
             r = await gpt_request(query, user_role, history=conversations[cid]["history"], systemprompt=system_prompt)
             conversations[cid]["history"].append((user_role, query))
             if len(conversations[cid]["history"]) > 10:
