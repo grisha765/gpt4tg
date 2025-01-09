@@ -36,7 +36,7 @@ async def process_queue(app, chat_id, genai=False):
             system_prompt = conversations[cid].get("system_prompt", "")
             if genai:
                 from models.genai import gpt_request
-                if msg.photo or msg.animation or msg.sticker:
+                if msg.photo or msg.animation or msg.sticker or msg.voice:
                     caption = msg.caption if msg.caption else "None"
                     temp_file = tempfile.NamedTemporaryFile(delete=False)
                     logging.debug(f"{cid}: download media file")
