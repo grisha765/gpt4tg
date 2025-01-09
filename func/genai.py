@@ -56,7 +56,7 @@ async def gpt_request(text, username, history, systemprompt):
         },
     }
 
-    max_retries = 3
+    max_retries = 15
     retry_delay = 15  # seconds
 
     for attempt in range(1, max_retries + 1):
