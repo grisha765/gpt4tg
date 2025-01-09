@@ -51,7 +51,7 @@ async def process_queue(app, chat_id, genai=False):
             conversations[cid]["history"].append(("bot", r))
             if len(conversations[cid]["history"]) > 10:
                 conversations[cid]["history"].pop(0)
-            r_msg = await msg.reply(r[:4096].replace('@', '')) #type: ignore
+            r_msg = await msg.reply(r[:4096].replace('@', ''), parse_mode=ParseMode.MARKDOWN) #type: ignore
             conv_map[r_msg.id] = cid
         except Exception as e:
             logging.error(f"Error processing GPT request: {e}")
