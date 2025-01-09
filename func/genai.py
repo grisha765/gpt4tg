@@ -48,8 +48,12 @@ async def gpt_request(text, username, history, systemprompt):
         ],
 
         "contents": messages,
-        "generationConfig": {"temperature": Config.gpt_temperature,
-                             "maxOutputTokens": Config.gpt_tokens},
+        "generationConfig": {
+            "temperature": Config.gpt_temperature,
+            "maxOutputTokens": Config.gpt_tokens,
+            "topP": 0.95,
+            "topK": 40,
+        },
     }
 
     max_retries = 3
