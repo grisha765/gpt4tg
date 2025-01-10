@@ -1,5 +1,6 @@
 import asyncio, re, tempfile, os
 from pyrogram.enums import ChatAction, ParseMode
+from config.config import Config
 from config import logging_config
 logging = logging_config.setup_logging(__name__)
 
@@ -46,12 +47,12 @@ async def process_queue(app, chat_id, genai=False):
                     media = temp_file.name
             else:
                 from models.gpt import gpt_request
-            r = await gpt_request(query, user_role, history=conversations[cid]["history"], systemprompt=system_prompt, media_file=media)
+            r = await gpt_request(query, user_role, history=conversations[cid]["history"], systemprompt=system_prompt, media_file=media) #type: ignore
             conversations[cid]["history"].append((user_role, query))
-            if len(conversations[cid]["history"]) > 10:
+            if len(conversations[cid]["history"]) > Config.chat_msg_storage:
                 conversations[cid]["history"].pop(0)
             conversations[cid]["history"].append(("bot", r))
-            if len(conversations[cid]["history"]) > 10:
+            if len(conversations[cid]["history"]) > Config.chat_msg_storage:
                 conversations[cid]["history"].pop(0)
             r_msg = await msg.reply(r[:4096].replace('@', ''), parse_mode=ParseMode.MARKDOWN) #type: ignore
             conv_map[r_msg.id] = cid
@@ -63,8 +64,8 @@ async def process_queue(app, chat_id, genai=False):
             if genai:
                 if msg.photo or msg.animation or msg.sticker:
                     logging.debug(f"{cid}: remove media file")
-                    temp_file.close()
-                    os.remove(temp_file.name)
+                    temp_file.close() #type: ignore
+                    os.remove(temp_file.name) #type: ignore
 
     del processing_tasks[chat_id]
 

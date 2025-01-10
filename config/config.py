@@ -12,6 +12,7 @@ class Config:
     gpt_provider: str = 'DDG'
     gpt_tokens: int = 1024
     gpt_temperature: float = 0.7
+    chat_msg_storage: int = 10
     genai_api: list = []
 
     @classmethod

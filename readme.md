@@ -35,6 +35,7 @@ python3 -m venv .venv
     GPT_PROVIDER="DDG" # only works in gpt4free or ollama
     GPT_TOKENS="512"
     GPT_TEMPERATURE="0.5"
+    CHAT_MSG_STORAGE="10"
     ```
 
 #### Container
