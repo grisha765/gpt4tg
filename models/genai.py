@@ -5,7 +5,7 @@ logging = logging_config.setup_logging(__name__)
 
 prompt = ""
 
-async def gpt_request(text, username, history, systemprompt):
+async def gpt_request(text, username, history, systemprompt, media_file=False):
     logging.debug(f"GPT Request: {text}")
     logging.debug(f"GPT Chat History: {history}")
 
@@ -31,14 +31,12 @@ async def gpt_request(text, username, history, systemprompt):
                 "role": "user",
                 "parts": [{"text": f"{user_text}: {message_text}"}]
             })
-    if text.startswith("Send image: "):
-        parts = text.split("Send image: ")[1].split(" text: ")
-        filename = parts[0]
-        text = parts[1]
+    if media_file:
+        text = text.split("text:")[-1].strip()
         mime = magic.Magic(mime=True)
-        mime_type = mime.from_file(filename)
-        if os.path.isfile(filename):
-            with open(filename, "rb") as img_file:
+        if os.path.isfile(media_file):
+            mime_type = mime.from_file(media_file)
+            with open(media_file, "rb") as img_file:
                 encoded_image = base64.b64encode(img_file.read()).decode("utf-8")
             messages.append({
                 "role": "user",

@@ -32,6 +32,7 @@ async def process_queue(app, chat_id, genai=False):
         cid = req['conv_id']
         user_role = req['user_role']
         typing_task = await gen_typing(app, chat_id, True)
+        media = False
         try:
             system_prompt = conversations[cid].get("system_prompt", "")
             if genai:
@@ -41,10 +42,11 @@ async def process_queue(app, chat_id, genai=False):
                     temp_file = tempfile.NamedTemporaryFile(delete=False)
                     logging.debug(f"{cid}: download media file")
                     await msg.download(temp_file.name)
-                    query = f"Send image: {temp_file.name}" + f" text: {caption}"
+                    query = f"Send media: {temp_file.name} text: {caption}"
+                    media = temp_file.name
             else:
                 from models.gpt import gpt_request
-            r = await gpt_request(query, user_role, history=conversations[cid]["history"], systemprompt=system_prompt)
+            r = await gpt_request(query, user_role, history=conversations[cid]["history"], systemprompt=system_prompt, media_file=media)
             conversations[cid]["history"].append((user_role, query))
             if len(conversations[cid]["history"]) > 10:
                 conversations[cid]["history"].pop(0)

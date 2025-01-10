@@ -3,7 +3,7 @@ from config.config import Config
 from config import logging_config
 logging = logging_config.setup_logging(__name__)
 
-async def gpt_request(text, username, history, systemprompt):
+async def gpt_request(text, username, history, systemprompt, media_file=False):
     logging.debug(f"GPT Request: {text}")
     logging.debug(f"GPT Chat History: {history}")
     url = f"http://{Config.api_ip}:{Config.api_port}/v1/chat/completions"
