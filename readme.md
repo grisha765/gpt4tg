@@ -30,7 +30,7 @@ python3 -m venv .venv
     DB_PATH="data.json"
     API_IP="127.0.0.1"
     API_PORT="1337"
-    GENAI_API="your_gemini_api_key" # if not empty then gemini is activated
+    GENAI_API="your_gemini_api_key, your_gemini_api_key2, your_gemini_api_key3" # if not empty then gemini is activated
     GPT_MODEL="gpt-4o-mini" # also set for gemini
     GPT_PROVIDER="DDG" # only works in gpt4free or ollama
     GPT_TOKENS="512"

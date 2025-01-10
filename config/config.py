@@ -12,7 +12,7 @@ class Config:
     gpt_provider: str = 'DDG'
     gpt_tokens: int = 1024
     gpt_temperature: float = 0.7
-    genai_api: str = ""
+    genai_api: list = []
 
     @classmethod
     def load_from_env(cls):

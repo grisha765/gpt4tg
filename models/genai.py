@@ -1,20 +1,23 @@
-import aiohttp, asyncio, base64, os, magic
+import aiohttp, asyncio, base64, os, magic, random
 from config.config import Config
 from config import logging_config
 logging = logging_config.setup_logging(__name__)
 
 prompt = ""
 
+current_key = {"number": 0}
+
 async def gpt_request(text, username, history, systemprompt, media_file=False):
     logging.debug(f"GPT Request: {text}")
     logging.debug(f"GPT Chat History: {history}")
 
     model_name = Config.gpt_model
+    api_keys = Config.genai_api
 
     with open('config/prompt.txt', 'r', encoding='utf-8') as file:
         txt_prompt = file.read()
     
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={Config.genai_api}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_keys[current_key["number"]].strip()}"
     headers = {
         "Content-Type": "application/json"
     }
@@ -98,6 +101,13 @@ async def gpt_request(text, username, history, systemprompt, media_file=False):
                         content = data["candidates"][0]["content"]["parts"][0]["text"]
                         logging.debug(f"GPT Response: {content}")
                         return content
+                    elif response.status == 429:
+                        logging.warning(f"Request failed with status code {response.status} when using index: {current_key["number"]}. Updating index attempt {attempt} of {max_retries}...")
+                        if attempt < max_retries:
+                            new_index = random.choice([i for i in range(len(api_keys)) if i != current_key["number"]])
+                            current_key["number"] = new_index
+                        else:
+                            return f"📛 Request failed with status code {response.status}."
                     else:
                         logging.error(f"Request failed with status code {response.status}\n{await response.text()}")
                         return f"📛 Request failed with status code {response.status}."
