@@ -25,6 +25,13 @@ async def gen_typing(app, chat_id, typing_task):
         except asyncio.CancelledError:
             pass
 
+def convert_tgs_to_gif(tgs_file: str, gif_file: str):
+    from lottie.exporters.gif import export_gif
+    from lottie.parsers.tgs import parse_tgs
+    with open(tgs_file, "rb") as file:
+        lottie_animation = parse_tgs(file)
+    export_gif(lottie_animation, gif_file, skip_frames=30)
+
 async def process_queue(app, chat_id, genai=False):
     while not queues[chat_id].empty():
         req = await queues[chat_id].get()
@@ -43,6 +50,8 @@ async def process_queue(app, chat_id, genai=False):
                     temp_file = tempfile.NamedTemporaryFile(delete=False)
                     logging.debug(f"{cid}: download media file")
                     await msg.download(temp_file.name)
+                    if msg.sticker.is_animated:
+                        convert_tgs_to_gif(temp_file.name, temp_file.name)
                     query = f"Send media: {temp_file.name} text: {caption}"
                     media = temp_file.name
             else:
