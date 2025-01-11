@@ -8,7 +8,7 @@ cffi==1.17.1
 cssselect2==0.7.0
 defusedxml==0.7.1
 frozenlist==1.5.0
-glaxnimate==0.5.4
+glaxnimate==0.4.3
 idna==3.10
 lottie==0.7.1
 multidict==6.1.0
