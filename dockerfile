@@ -1,6 +1,6 @@
 FROM python:3.12-alpine
 
-RUN apk add --no-cache file gcc musl-dev
+RUN apk add --no-cache file gcc musl-dev pango
 
 WORKDIR /app
 
