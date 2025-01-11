@@ -50,7 +50,7 @@ async def process_queue(app, chat_id, genai=False):
                     temp_file = tempfile.NamedTemporaryFile(delete=False)
                     logging.debug(f"{cid}: download media file")
                     await msg.download(temp_file.name)
-                    if msg.sticker.is_animated:
+                    if msg.sticker and msg.sticker.is_animated:
                         convert_tgs_to_gif(temp_file.name, temp_file.name)
                     query = f"Send media: {temp_file.name} text: {caption}"
                     media = temp_file.name
