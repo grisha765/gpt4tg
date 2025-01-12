@@ -89,15 +89,28 @@ async def request(app, message, text, genai=False):
     #logging.debug(f"conversations: {conversations}")
     if len(text) <= 1:
         await message.reply(
-            'Please enter text after the /gpt command. Example: \n<code>/gpt "prompt optional" Tell me a joke.</code>',
+            'Please enter text after the /gpt command. Example: \n<code>/gpt "system prompt optional" Tell me a joke.</code>',
             parse_mode=ParseMode.HTML
         )
         return
-    system_prompt, query = "", text[1]
-    m = re.match(r'^"([^"]+)"(.*)$', query)
+
+    full_text = " ".join(text[1:]).strip()
+    system_prompt, query = "", ""
+    m = re.match(r'^"([^"]+)"\s*(.*)$', full_text, re.DOTALL)
+
     if m:
         system_prompt = m.group(1).strip()
-        query = m.group(2).strip() if m.group(2) else ""
+        query = m.group(2).strip()
+    else:
+        query = full_text
+
+    if not query:
+        await message.reply(
+            'Please enter some query text after the system prompt. Example: \n<code>/gpt "system prompt optional" Tell me a joke.</code>',
+            parse_mode=ParseMode.HTML
+        )
+        return
+
     chat_id = message.chat.id
     conv_id = f"{chat_id}_{message.id}"
     if conv_id not in conversations:
