@@ -75,6 +75,20 @@ async def gpt_request(text, username, history, systemprompt, media_file=False):
             "threshold": threshold
         })
 
+    if "2.0" in model_name:
+        search = [{
+            "googleSearch": {}
+        }]
+    else:
+        search = [{
+            "googleSearchRetrieval": {
+                "dynamic_retrieval_config": {
+                    "mode": "MODE_DYNAMIC",
+                    "dynamic_threshold": 0.3,
+                }
+            }
+        }]
+
     payload = {
         "system_instruction": { "parts": { "text": f"{txt_prompt}\n{systemprompt}"}},
 
@@ -87,6 +101,7 @@ async def gpt_request(text, username, history, systemprompt, media_file=False):
             "topP": 0.95,
             "topK": 40,
         },
+        "tools": search
     }
 
     max_retries = 15
