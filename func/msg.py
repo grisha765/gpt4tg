@@ -33,6 +33,7 @@ def convert_tgs_to_gif(tgs_file: str, gif_file: str):
     export_gif(lottie_animation, gif_file, skip_frames=30)
 
 async def process_queue(app, chat_id, genai=False):
+    processed_first_photo = False
     while not queues[chat_id].empty():
         req = await queues[chat_id].get()
         msg = req['message']
@@ -46,6 +47,10 @@ async def process_queue(app, chat_id, genai=False):
             if genai:
                 from models.genai import gpt_request
                 if msg.photo or msg.animation or msg.sticker or msg.voice:
+                    if processed_first_photo:
+                        logging.warning(f"{cid}: skipping subsequent photo.")
+                        continue
+                    processed_first_photo = True
                     caption = msg.caption if msg.caption else "None"
                     temp_file = tempfile.NamedTemporaryFile(delete=False)
                     logging.debug(f"{cid}: download media file")
@@ -72,9 +77,10 @@ async def process_queue(app, chat_id, genai=False):
             await gen_typing(app, chat_id, typing_task)
             if genai:
                 if msg.photo or msg.animation or msg.sticker:
-                    logging.debug(f"{cid}: remove media file")
                     temp_file.close() #type: ignore
-                    os.remove(temp_file.name) #type: ignore
+                    if os.path.exists(temp_file.name): #type: ignore
+                        logging.debug(f"{cid}: remove media file")
+                        os.remove(temp_file.name) #type: ignore
 
     del processing_tasks[chat_id]
 
