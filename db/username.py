@@ -36,5 +36,13 @@ async def check_username(user_id: int):
     except DoesNotExist:
         return False
 
+async def reset_username(user_id: int) -> bool:
+    try:
+        user_record = await UserName.get(user_id=user_id)
+        await user_record.delete()
+        return True
+    except DoesNotExist:
+        return False
+
 if __name__ == "__main__":
     raise RuntimeError("This module should be run only via main.py")

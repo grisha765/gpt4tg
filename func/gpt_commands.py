@@ -1,4 +1,4 @@
-from db.username import set_username, check_username
+from db.username import set_username, check_username, reset_username
 from config import logging_config
 logging = logging_config.setup_logging(__name__)
 
@@ -6,6 +6,11 @@ async def command_handler(message, username, command, args):
     if command == "!setname":
         user_id = message.from_user.id
         if args and len(args) > 0:
+            if args[0] == "reset":
+                reset = await reset_username(user_id)
+                if reset:
+                    await message.reply(f"{username} has cleared his username.")
+                    return
             new_username = args[0]
             if await set_username(user_id, new_username):
                 await message.reply(f"{username} has set a new username: {new_username}")
