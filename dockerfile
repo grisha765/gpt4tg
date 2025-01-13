@@ -12,7 +12,7 @@ COPY . /app
 
 ENV PYTHONUNBUFFERED=1
 
-ENV DB_PATH="/app/database/gpt4tg.json"
+ENV DB_PATH="/app/database/gpt4tg.db"
 
 CMD ["python", "main.py"]
 
