@@ -111,6 +111,17 @@ async def request(app, message, text, genai=False):
         )
         return
 
+    if message.reply_to_message:
+        replied_text = message.reply_to_message.text
+        replied_user = message.reply_to_message.from_user
+        if replied_user:
+            replied_username = replied_user.username
+        elif message.reply_to_message.chat:
+            replied_username = message.reply_to_message.chat.title
+        else:
+            replied_username = replied_user.first_name
+        query = f"Reply message: '{replied_username}: {replied_text}', text: {query}"
+
     chat_id = message.chat.id
     conv_id = f"{chat_id}_{message.id}"
     if conv_id not in conversations:
