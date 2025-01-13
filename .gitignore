@@ -4,4 +4,4 @@ __pycache__/
 
 *.session
 
-*.json
+*.db
