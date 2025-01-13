@@ -109,7 +109,7 @@ async def gpt_request(text, username, history, systemprompt, media_file=False):
 
     for attempt in range(1, max_retries + 1):
         try:
-            async with aiohttp.ClientSession() as session:
+            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=180)) as session:
                 async with session.post(url, headers=headers, json=payload) as response:
                     if response.status == 200:
                         data = await response.json()
