@@ -1,7 +1,7 @@
 from config.config import Config
 from pyrogram import Client, filters #type: ignore
 
-from func.activate import is_activated, generate_password, activate_group
+from func.activate import is_activated, generate_password, activate_chat
 from func.msg import request, request_reply
 
 from config import logging_config
@@ -20,7 +20,7 @@ async def handle_new_chat_member(_, message):
 async def handle_activate_group(_, message):
     chat_id = message.chat.id
     text = message.text.split(maxsplit=1)
-    await activate_group(app, message, text, chat_id)
+    await activate_chat(app, message, text, chat_id)
 
 @app.on_message(filters.command("gpt") & activated_filter)
 async def handle_request(_, message):

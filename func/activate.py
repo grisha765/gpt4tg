@@ -19,8 +19,8 @@ async def generate_password(app, chat_id):
             "This bot requires activation to work, password appeared in the logs.\nEnter the command: /activate password_from_log"
         )
 
-async def activate_group(app, message, text, chat_id):
     if str(chat_id) not in activated_groups:
+async def activate_chat(app, message, text, chat_id):
         await generate_password(app, chat_id)
         return
 
