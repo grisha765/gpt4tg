@@ -84,20 +84,12 @@ async def process_queue(app, chat_id, genai=False):
 
     del processing_tasks[chat_id]
 
-async def request(app, message, text, genai=False):
+async def request(app, message, text, username, genai=False):
     #logging.debug(f"conv map: {conv_map}")
     #logging.debug(f"conversations: {conversations}")
-    if len(text) <= 1:
-        await message.reply(
-            'Please enter text after the /gpt command. Example: \n<code>/gpt "system prompt optional" Tell me a joke.</code>',
-            parse_mode=ParseMode.HTML
-        )
-        return
-
     full_text = " ".join(text[1:]).strip()
     system_prompt, query = "", ""
     m = re.match(r'^"([^"]+)"\s*(.*)$', full_text, re.DOTALL)
-
     if m:
         system_prompt = m.group(1).strip()
         query = m.group(2).strip()
@@ -133,16 +125,11 @@ async def request(app, message, text, genai=False):
     queue = queues[chat_id]
     pos = queue.qsize() + 1
     logging.debug(f"{chat_id}: request is in the queue. Position: {pos}")
-    username = message.from_user.username
-    if username:
-        user = username
-    else:
-        user = message.from_user.first_name
-    await queue.put({'query': query, 'message': message, 'conv_id': conv_id, 'user_role': user})
+    await queue.put({'query': query, 'message': message, 'conv_id': conv_id, 'user_role': username})
     if chat_id not in processing_tasks:
         processing_tasks[chat_id] = asyncio.create_task(process_queue(app, chat_id, genai=genai))
 
-async def request_reply(app, message, text, genai=False):
+async def request_reply(app, message, text, username, genai=False):
     #logging.debug(f"reply conv map: {conv_map}")
     #logging.debug(f"reply conversations: {conversations}")
     if not message.reply_to_message:
@@ -157,12 +144,7 @@ async def request_reply(app, message, text, genai=False):
     queue = queues[chat_id]
     pos = queue.qsize() + 1
     logging.debug(f"{chat_id}: request is in the queue. Position: {pos}")
-    username = message.from_user.username
-    if username:
-        user = username
-    else:
-        user = message.from_user.first_name
-    await queue.put({'query': text, 'message': message, 'conv_id': conv_id, 'user_role': user})
+    await queue.put({'query': text, 'message': message, 'conv_id': conv_id, 'user_role': username})
     if chat_id not in processing_tasks:
         processing_tasks[chat_id] = asyncio.create_task(process_queue(app, chat_id, genai=genai))
 
