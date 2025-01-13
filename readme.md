@@ -27,7 +27,7 @@ python3 -m venv .venv
     TG_ID="your_telegram_api_id"
     TG_HASH="your_telegram_api_hash"
     TG_TOKEN="your_telegram_bot_token"
-    DB_PATH="data.json"
+    DB_PATH="data.db"
     API_IP="127.0.0.1"
     API_PORT="1337"
     GENAI_API="your_gemini_api_key, your_gemini_api_key2, your_gemini_api_key3" # if not empty then gemini is activated
