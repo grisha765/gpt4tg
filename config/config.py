@@ -5,7 +5,7 @@ class Config:
     tg_id: str = '1'
     tg_hash: str = 'b6b154c3707471f5339bd661645ed3d6'
     tg_token: str = 'None'
-    db_path: str = 'data.json'
+    db_path: str = 'data.db'
     api_ip: str = '127.0.0.1'
     api_port: str = '1337'
     gpt_model: str = 'gpt-4o-mini'
