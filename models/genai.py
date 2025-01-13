@@ -113,7 +113,8 @@ async def gpt_request(text, username, history, systemprompt, media_file=False):
                 async with session.post(url, headers=headers, json=payload) as response:
                     if response.status == 200:
                         data = await response.json()
-                        content = data["candidates"][0]["content"]["parts"][0]["text"]
+                        content_parts = data["candidates"][0]["content"]["parts"]
+                        content = "".join(part["text"] for part in content_parts)
                         logging.debug(f"GPT Response: {content}")
                         return content
                     elif response.status == 429:
