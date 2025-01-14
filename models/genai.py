@@ -105,7 +105,6 @@ async def gpt_request(text, username, history, systemprompt, media_file=False):
     }
 
     max_retries = 15
-    retry_delay = 15  # seconds
 
     for attempt in range(1, max_retries + 1):
         try:
@@ -129,12 +128,7 @@ async def gpt_request(text, username, history, systemprompt, media_file=False):
                         return f"📛 Request failed with status code {response.status}."
         except Exception as e:
             logging.error(f"An error occurred during the request: {str(e)}")
-            if attempt < max_retries:
-                logging.warning(f"Retrying after error... Attempt {attempt} of {max_retries}")
-                await asyncio.sleep(retry_delay)
-            else:
-                logging.error("Max retries reached after exception.")
-                return "📛 Request failed after maximum retries due to an exception."
+            return f"📛 An error occurred during the request: {str(e)}"
 
 if __name__ == "__main__":
     raise RuntimeError("This module should be run only via main.py")
