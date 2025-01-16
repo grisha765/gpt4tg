@@ -5,7 +5,7 @@ from tortoise.exceptions import DoesNotExist
 async def set_username(user_id: int, username: str) -> bool:
     if not (5 <= len(username) <= 32):
         return False
-    if not re.fullmatch(r"[a-zа-яё0-9]+", username, re.IGNORECASE):
+    if not re.fullmatch(r"[a-zа-яё0-9_]+", username, re.IGNORECASE):
         return False
 
     existing_user = await UserName.filter(username=username).first()
