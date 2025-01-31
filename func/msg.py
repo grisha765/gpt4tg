@@ -104,12 +104,15 @@ async def request(app, message, text, username, genai=False):
         return
 
     if message.reply_to_message:
-        replied_text = message.reply_to_message.text
-        replied_user = message.reply_to_message.from_user
+        replied_msg = message.reply_to_message
+
+        replied_text = replied_msg.text or replied_msg.caption
+        replied_user = replied_msg.from_user
+
         if replied_user:
             replied_username = replied_user.username
         elif message.reply_to_message.chat:
-            replied_username = message.reply_to_message.chat.title
+            replied_username = replied_msg.chat.title
         else:
             replied_username = replied_user.first_name
         query = f"Reply message: '{replied_username}: {replied_text}', text: {query}"
