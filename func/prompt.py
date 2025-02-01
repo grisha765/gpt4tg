@@ -4,7 +4,7 @@ def gen_prompt(analysis=False):
     if isinstance(analysis, dict):
         if isinstance(analysis["type"], dict):
             if "username" in analysis["type"]:
-                link = f'https://t.me/{analysis["type"]["username"]}/message_id'
+                link = f'https://t.me/{analysis.get("chat_link_id")}/message_id'
             else:
                 link = f'https://t.me/c/{analysis.get("chat_link_id")}/message_id'
             prompt += f"""
