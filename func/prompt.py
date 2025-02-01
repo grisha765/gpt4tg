@@ -8,26 +8,25 @@ def gen_prompt(analysis=False):
             else:
                 link = f'https://t.me/c/{analysis.get("chat_link_id")}/message_id'
             prompt += f"""
-    Your task is to briefly analyze this chat. Different users are participating in the conversation, and their messages are prefixed with [message_id].
+Your task is to briefly analyze this chat, where different users are participating. Their messages are prefixed with [message_id].
 
-    You need to:
+You need to:
 
-    - Summarize the chat topics – Identify the key themes and subjects being discussed.
-    - Characterize the chat – Describe its general tone, purpose, and engagement level (e.g., informal, technical, heated discussion, casual, etc.).
-    - Highlight important messages – Identify crucial or particularly relevant messages and format them as follows:
-    "[message_id]({link})" - short review.
-    
-    Additional Considerations:
+- Summarize the main topics – Identify key themes and subjects being discussed.
+- Characterize the chat – Describe its tone, purpose, and engagement level (e.g., informal, technical, heated discussion, casual, etc.).
+- Highlight important messages – Identify and briefly review key messages using the following format: "[message_id]({link})" – short summary.
 
-    - Focus on recurring themes and major discussion points rather than minor off-topic exchanges.
-    - If the chat includes debates, summarize key arguments from different perspectives.
-    - If trends or shifts in the discussion emerge, note how the conversation evolves over time.
-    - If necessary, mention any noticeable user behaviors (e.g., spam, conflicts, expert contributions).
-    - Identify when a new topic starts by providing the message ID and the username of the person who initiated it: "[message_id]({link})" – started by username.
-    - If the topic changes for a period and then continues, provide the message ID of the continuation with the username who brought it back: "[message_id]({link})" – continued by username.
-    - Be sure to formulate your answer in Russian language.
+Additional Guidelines:
 
-    Your analysis should be concise, structured, and insightful to help quickly understand the chat’s key points.
+- Focus on recurring themes and significant discussion points, rather than minor off-topic exchanges.
+- If debates occur, summarize the main arguments from different perspectives.
+- Track how the discussion evolves, noting shifts in topics or tone.
+- Identify any noteworthy user behaviors (e.g., spamming, conflicts, expert contributions).
+- When a new topic is introduced, mention the message ID and the username of the person who started it: "[message_id]({link})" – started by username.
+- If a topic is revisited after a break, mention the message ID and the username who brought it back: "[message_id]({link})" – continued by username.
+- Provide the analysis in Russian.
+
+Your summary should be concise, structured, and insightful, offering a clear overview of the chat’s key points.
             """
         else:
             prompt = """
