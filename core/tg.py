@@ -52,15 +52,15 @@ async def handle_request(_, message):
 
 @app.on_message(activated_filter & ~filters.media & ~filters.command("gpt"))
 async def handle_save_message(_, message):
+    if message.reply_to_message and message.reply_to_message.from_user.is_bot:
+        await handle_reply(_, message)
+        return
+
     chat_id = message.chat.id
     message_id = message.id
     username = message.from_user.username or message.from_user.first_name
     message_text = message.text
     reply_to_message_id = message.reply_to_message.id if message.reply_to_message else None
-
-    if message.reply_to_message and message.reply_to_message.from_user.is_bot:
-        await handle_reply(_, message)
-        return
 
     if await save_message(chat_id, message_id, username, message_text, reply_to_message_id):
         logging.debug(f"{chat_id}: Message {message_id} saved!")
