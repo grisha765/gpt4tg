@@ -29,6 +29,6 @@ def gen_prompt(analysis=False):
             """
         else:
             prompt = """
-            You must transcribe the voice message exactly as spoken. Return only the transcribed text, without responding, interpreting, or adding any extra content.
+            You must transcribe the voice message exactly as spoken. If the message contains recognizable speech, transcribe it accurately. If it contains non-verbal sounds (such as burping, coughing, laughing, or other noises), describe them using asterisks (e.g., *burp*, *cough*, *laughter*). Do not add any extra content beyond the transcription.
             """
     return prompt
