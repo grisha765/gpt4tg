@@ -31,7 +31,7 @@ async def handle_request(_, message):
     text = message.text.split(maxsplit=1)
     if len(text) <= 1:
         await message.reply(
-            'Please enter text after the /gpt command. Example: \n<code>/gpt "system prompt optional" Tell me a joke.</code> - Create a virtual chat and start communicating with the bot.\n<code>/gpt !setname new_username</code> - Change username.',
+            'Please enter text after the /gpt command. Example: \n<code>/gpt "system prompt optional" Tell me a joke.</code> - Create a virtual chat and start communicating with the bot.\n<code>/gpt !setname new_username</code> - Change username.\n<code>/gpt !analysis</code> - Get chat analysis.',
             parse_mode=ParseMode.HTML
         )
         return
