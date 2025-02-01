@@ -158,12 +158,14 @@ async def analysis(app, message):
         chat_id = message.chat.id
         if message.chat.username:
             chat_link_id = message.chat.username
+            username = True
         else:
             chat_link_id = str(chat_id).replace("-100", "")
+            username = False
         text = 'Your task is to briefly analyze this chat.'
         typing_task = await gen_typing(app, chat_id, True)
         history = await get_messages(chat_id)
-        resp = await gpt_request(text, "", history, {"chat_link_id": chat_link_id}, media_file=False)
+        resp = await gpt_request(text, "", history, {"chat_link_id": chat_link_id, "username": username}, media_file=False)
         await message.reply(resp)
         await gen_typing(app, chat_id, typing_task)
     else:

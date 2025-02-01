@@ -2,7 +2,10 @@ def gen_prompt(analysis=False):
     with open('config/prompt.txt', 'r', encoding='utf-8') as file:
         prompt = file.read()
     if isinstance(analysis, dict):
-        print(analysis)
+        if analysis.get("username"):
+            link = f'https://t.me/{analysis.get("chat_link_id")}/message_id'
+        else:
+            link = f'https://t.me/c/{analysis.get("chat_link_id")}/message_id'
         prompt += f"""
 Your task is to briefly analyze this chat. Different users are participating in the conversation, and their messages are prefixed with [message_id].
 
@@ -11,7 +14,7 @@ You need to:
 - Summarize the chat topics – Identify the key themes and subjects being discussed.
 - Characterize the chat – Describe its general tone, purpose, and engagement level (e.g., informal, technical, heated discussion, casual, etc.).
 - Highlight important messages – Identify crucial or particularly relevant messages and format them as follows:
-"[message_id](https://t.me/c/{analysis.get("chat_link_id")}/message_id)" - short review.
+"[message_id]({link})" - short review.
 
 Additional Considerations:
 
