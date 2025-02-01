@@ -15,7 +15,6 @@ async def gpt_request(text, username, history, systemprompt, media_file=False):
     model_name = Config.gpt_model
     api_keys = Config.genai_api
     
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_keys[current_key["number"]].strip()}"
     headers = {
         "Content-Type": "application/json"
     }
@@ -111,6 +110,7 @@ async def gpt_request(text, username, history, systemprompt, media_file=False):
     retry_delay = 3
 
     for attempt in range(1, max_retries + 1):
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_keys[current_key["number"]].strip()}"
         try:
             async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=180)) as session:
                 async with session.post(url, headers=headers, json=payload) as response:
