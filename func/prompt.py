@@ -19,6 +19,7 @@ Additional Considerations:
 - If the chat includes debates, summarize key arguments from different perspectives.
 - If trends or shifts in the discussion emerge, note how the conversation evolves over time.
 - If necessary, mention any noticeable user behaviors (e.g., spam, conflicts, expert contributions).
+- Be sure to formulate your answer in Russian language.
 
 Your analysis should be concise, structured, and insightful to help quickly understand the chat’s key points. 
         """
