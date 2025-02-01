@@ -12,21 +12,21 @@ def gen_prompt(analysis=False):
 
     You need to:
 
-    - Summarize the chat topics – Identify the key themes and subjects being discussed.
-    - When analyzing key topics and discussions, mention the message ID and the username of the person who initiated them: "[message_id]({link})" – started by username.
-    - Characterize the chat – Describe its general tone, purpose, and engagement level (e.g., informal, technical, heated discussion, casual, etc.).
-    - Highlight important messages – Identify crucial or particularly relevant messages and format them as follows:
-    "[message_id]({link})" - short review.
+    - Summarize the key topics – Identify up to 5 most important themes and subjects being discussed.
+    - For each major topic, mention the message ID and the username of the person who started it: "[message_id]({link})" – started by username.
+    - Focus only on important messages – Highlight up to 10 crucial or particularly relevant messages.
+    - If any debates or notable discussions occur, summarize the key arguments from different perspectives.
+    - Highlight key shifts or changes in the conversation, such as evolving trends or emerging themes.
+    - Emphasize critical or highly relevant messages, and format them as follows: "[message_id]({link})" - short review.
 
     Additional Considerations:
 
-    - Focus on recurring themes and major discussion points rather than minor off-topic exchanges.
-    - If the chat includes debates, summarize key arguments from different perspectives.
-    - If trends or shifts in the discussion emerge, note how the conversation evolves over time.
-    - If necessary, mention any noticeable user behaviors (e.g., spam, conflicts, expert contributions).
+    - Avoid discussing irrelevant or minor exchanges.
+    - Pay attention to any notable user behaviors (e.g., spamming, conflict, expert input).
+    - Your response should be brief, structured, and insightful, focusing only on the key points.
     - Be sure to formulate your answer in Russian language.
-
-    Your analysis should be concise, structured, and insightful to help quickly understand the chat’s key points. 
+    
+    Your analysis should be concise, structured, and insightful to help quickly understand the chat’s key points.
             """
         else:
             prompt = """
