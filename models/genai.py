@@ -1,4 +1,5 @@
 import aiohttp, asyncio, base64, os, magic, random
+from func.prompt import gen_prompt
 from config.config import Config
 from config import logging_config
 logging = logging_config.setup_logging(__name__)
@@ -13,9 +14,6 @@ async def gpt_request(text, username, history, systemprompt, media_file=False):
 
     model_name = Config.gpt_model
     api_keys = Config.genai_api
-
-    with open('config/prompt.txt', 'r', encoding='utf-8') as file:
-        txt_prompt = file.read()
     
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_keys[current_key["number"]].strip()}"
     headers = {
@@ -23,17 +21,20 @@ async def gpt_request(text, username, history, systemprompt, media_file=False):
     }
     messages = []
     logging.debug(f"GPT Prompt: {systemprompt}")
-    for user_text, message_text in history:
-        if user_text == 'bot':
-            messages.append({
-                "role": "model",
-                "parts": [{"text": message_text}]
-            })
-        else:
-            messages.append({
-                "role": "user",
-                "parts": [{"text": f"{user_text}: {message_text}"}]
-            })
+    if all(isinstance(item, tuple) and len(item) == 2 for item in history):
+        for user_text, message_text in history:
+            if user_text == 'bot':
+                messages.append({
+                    "role": "model",
+                    "parts": [{"text": message_text}]
+                })
+            else:
+                messages.append({
+                    "role": "user",
+                    "parts": [{"text": f"{user_text}: {message_text}"}]
+                })
+    else:
+        messages.append(history)
     if media_file:
         text = text.split("text:")[-1].strip()
         mime = magic.Magic(mime=True)
@@ -90,7 +91,7 @@ async def gpt_request(text, username, history, systemprompt, media_file=False):
         }]
 
     payload = {
-        "system_instruction": { "parts": { "text": f"{txt_prompt}\n{systemprompt}"}},
+        "system_instruction": { "parts": { "text": f"{gen_prompt(systemprompt)}\n{systemprompt}"}},
 
         "safetySettings": safety_settings,
 
