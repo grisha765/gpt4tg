@@ -1,5 +1,6 @@
 import asyncio, re, tempfile, os
 from pyrogram.enums import ChatAction, ParseMode
+from db.chat import save_message
 from config.config import Config
 from config import logging_config
 logging = logging_config.setup_logging(__name__)
@@ -151,6 +152,38 @@ async def request_reply(app, message, text, username, genai=False):
     if chat_id not in processing_tasks:
         processing_tasks[chat_id] = asyncio.create_task(process_queue(app, chat_id, genai=genai))
 
+async def save_messages(message):
+    chat_id = message.chat.id
+    message_id = message.id
+    username = message.from_user.username or message.from_user.first_name
+    message_text = message.text or message.caption
+    if message.voice and Config.genai_api:
+        from models.genai import gpt_request
+        temp_file = tempfile.NamedTemporaryFile(delete=False)
+        logging.debug(f"{chat_id}: download media file")
+        await message.download(temp_file.name)
+        media = temp_file.name
+        message_text = await gpt_request(
+            "text: None",
+            "",
+            None,
+            {"chat_link_id": None, "type": "voice"},
+            media_file=media #type: ignore
+        )
+        temp_file.close() #type: ignore
+        if os.path.exists(media): #type: ignore
+            logging.debug(f"{chat_id}: remove media file")
+            os.remove(media) #type: ignore
+        if "📛" in str(message_text) or message_text == None:
+            return
+    elif message.media:
+        return
+
+    reply_to_message_id = message.reply_to_message.id if message.reply_to_message else None
+
+    if await save_message(chat_id, message_id, username, message_text, reply_to_message_id):
+        logging.debug(f"{chat_id}: Message {message_id} saved!")
+
 async def analysis(app, message):
     if Config.genai_api:
         from models.genai import gpt_request
@@ -165,7 +198,7 @@ async def analysis(app, message):
         text = 'Your task is to briefly analyze this chat.'
         typing_task = await gen_typing(app, chat_id, True)
         history = await get_messages(chat_id)
-        resp = await gpt_request(text, "", history, {"chat_link_id": chat_link_id, "username": username}, media_file=False)
+        resp = await gpt_request(text, "", history, {"chat_link_id": chat_link_id, "type": {"username": username}}, media_file=False)
         await message.reply(resp)
         await gen_typing(app, chat_id, typing_task)
     else:
