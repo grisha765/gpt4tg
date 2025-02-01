@@ -151,5 +151,23 @@ async def request_reply(app, message, text, username, genai=False):
     if chat_id not in processing_tasks:
         processing_tasks[chat_id] = asyncio.create_task(process_queue(app, chat_id, genai=genai))
 
+async def analysis(app, message):
+    if Config.genai_api:
+        from models.genai import gpt_request
+        from db.chat import get_messages
+        chat_id = message.chat.id
+        if message.chat.username:
+            chat_link_id = message.chat.username
+        else:
+            chat_link_id = str(chat_id).replace("-100", "")
+        text = 'Your task is to briefly analyze this chat.'
+        typing_task = await gen_typing(app, chat_id, True)
+        history = await get_messages(chat_id)
+        resp = await gpt_request(text, "", history, {"chat_link_id": chat_link_id}, media_file=False)
+        await message.reply(resp)
+        await gen_typing(app, chat_id, typing_task)
+    else:
+        await message.reply("Function available only in gemini.")
+
 if __name__ == "__main__":
     raise RuntimeError("This module should be run only via main.py")
