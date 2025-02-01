@@ -3,7 +3,7 @@ def gen_prompt(analysis=False):
         prompt = file.read()
     if isinstance(analysis, dict):
         if isinstance(analysis["type"], dict):
-            if "username" in analysis["type"]:
+            if analysis["type"].get("username", False):
                 link = f'https://t.me/{analysis.get("chat_link_id")}/message_id'
             else:
                 link = f'https://t.me/c/{analysis.get("chat_link_id")}/message_id'
