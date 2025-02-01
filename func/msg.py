@@ -155,7 +155,10 @@ async def request_reply(app, message, text, username, genai=False):
 async def save_messages(message):
     chat_id = message.chat.id
     message_id = message.id
-    username = message.from_user.username or message.from_user.first_name
+    if message.sender_chat:
+        username = message.sender_chat.title
+    else:
+        username = message.from_user.username or message.from_user.first_name
     message_text = message.text or message.caption
     if message.voice and Config.genai_api:
         from models.genai import gpt_request
