@@ -21,7 +21,9 @@ async def gpt_request(text, username, history, systemprompt, media_file=False):
     }
     messages = []
     logging.debug(f"GPT Prompt: {systemprompt}")
-    if all(isinstance(item, tuple) and len(item) == 2 for item in history):
+    if history == None:
+        pass
+    elif all(isinstance(item, tuple) and len(item) == 2 for item in history):
         for user_text, message_text in history:
             if user_text == 'bot':
                 messages.append({
