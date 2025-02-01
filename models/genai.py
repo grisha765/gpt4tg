@@ -108,6 +108,7 @@ async def gpt_request(text, username, history, systemprompt, media_file=False):
     }
 
     max_retries = 15
+    retry_delay = 3
 
     for attempt in range(1, max_retries + 1):
         try:
@@ -124,6 +125,13 @@ async def gpt_request(text, username, history, systemprompt, media_file=False):
                         if attempt < max_retries:
                             new_index = random.choice([i for i in range(len(api_keys)) if i != current_key["number"]])
                             current_key["number"] = new_index
+                            await asyncio.sleep(retry_delay)
+                        else:
+                            return f"📛 Request failed with status code {response.status}."
+                    elif response.status == 503:
+                        logging.warning(f"Request failed with status code {response.status}. Updating index attempt {attempt} of {max_retries}...")
+                        if attempt < max_retries:
+                            await asyncio.sleep(retry_delay)
                         else:
                             return f"📛 Request failed with status code {response.status}."
                     else:
