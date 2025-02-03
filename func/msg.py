@@ -156,7 +156,7 @@ async def save_messages(message):
     chat_id = message.chat.id
     message_id = message.id
     if message.sender_chat:
-        username = message.sender_chat.title
+        username = message.sender_chat.username
     else:
         username = message.from_user.username or message.from_user.first_name
     message_text = message.text or message.caption
