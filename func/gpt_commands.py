@@ -4,7 +4,10 @@ from func.msg import analysis
 from config import logging_config
 logging = logging_config.setup_logging(__name__)
 
+analysis_queue = False
+
 async def command_handler(app, message, username, command, args):
+    global analysis_queue
     if command == "!setname":
         user_id = message.from_user.id
         if args and len(args) > 0:
@@ -21,7 +24,14 @@ async def command_handler(app, message, username, command, args):
         else:
             await message.reply(f"Your Username: {await check_username(user_id)}") 
     elif command == "!analysis":
-        await analysis(app, message)
+        if not analysis_queue:
+            analysis_queue = True
+            try:
+                await analysis(app, message)
+            finally:
+                analysis_queue = False
+        else:
+            await message.reply("Wait until the last analysis is over.")
     else:
         await message.reply("Unknown command.")
 
