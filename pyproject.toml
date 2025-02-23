@@ -7,6 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "aiohttp>=3.11.12",
     "pyrofork>=2.3.58",
+    "python-magic>=0.4.27",
     "tgcrypto-pyrofork>=1.2.7",
     "tortoise-orm>=0.24.0",
 ]
