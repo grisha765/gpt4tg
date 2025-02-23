@@ -1,7 +1,5 @@
 FROM ghcr.io/astral-sh/uv:python3.12-alpine AS builder
 
-RUN apk add --no-cache file gcc musl-dev pango
-
 WORKDIR /app
 
 COPY pyproject.toml uv.lock /app
@@ -10,6 +8,8 @@ RUN uv sync --no-cache
 
 
 FROM python:3.12-alpine AS main
+
+RUN apk add --no-cache file pango
 
 WORKDIR /app
 
