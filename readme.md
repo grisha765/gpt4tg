@@ -4,21 +4,19 @@ A Telegram bot that integrates GPT-powered conversations with activation-based f
 ### Initial Setup
 
 1. **Clone the repository**: Clone this repository using `git clone`.
-2. **Create Virtual Env**: Create a Python Virtual Env `venv` to download the required dependencies and libraries.
-3. **Download Dependencies**: Download the required dependencies into the Virtual Env `venv` using `pip`.
+2. **Download Dependencies**: Download the required dependencies into the Virtual Environment `venv` using `uv`.
 
 ```shell
 git clone https://github.com/grisha765/gpt4tg.git
 cd gpt4tg
-python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt 
+uv sync
 ```
 
 ### Deploy
 
 - Run the bot:
     ```bash
-    TG_TOKEN="your_telegram_bot_token" .venv/bin/python main.py
+    TG_TOKEN="your_telegram_bot_token" uv run main.py
     ```
 
 - Other working env's:
