@@ -1,0 +1,16 @@
+[project]
+name = "gpt4tg"
+version = "0.1.0"
+description = "Implementation of the gpt4free project and gemini as telegram bot"
+readme = "readme.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aiohttp>=3.11.12",
+    "pyrofork>=2.3.58",
+    "tgcrypto-pyrofork>=1.2.7",
+    "tortoise-orm>=0.24.0",
+]
+
+[tool.pyright]
+venvPath = '.'
+venv = '.venv'
