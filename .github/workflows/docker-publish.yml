@@ -42,6 +42,7 @@ jobs:
         with:
           context: .
           file: ./dockerfile
+          target: main
           push: true
           tags: ${{ steps.get_tag.outputs.tag }}
 
