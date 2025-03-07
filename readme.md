@@ -9,7 +9,9 @@ A Telegram bot that integrates GPT-powered conversations with activation-based f
 ```shell
 git clone https://github.com/grisha765/gpt4tg.git
 cd gpt4tg
-uv sync
+python -m venv .venv
+.venv/bin/python -m pip install uv
+.venv/bin/python -m uv sync
 ```
 
 ### Deploy
