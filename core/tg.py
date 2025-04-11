@@ -51,7 +51,7 @@ async def handle_request(_, message):
 
 @app.on_message(activated_filter & ~filters.command("gpt"))
 async def handle_reply(_, message):
-    if message.reply_to_message and message.reply_to_message.from_user.is_bot:
+    if message.reply_to_message and message.reply_to_message.from_user and message.reply_to_message.from_user.is_bot:
         await handle_bot_reply(_, message)
         return
     else:
