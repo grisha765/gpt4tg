@@ -200,10 +200,15 @@ async def analysis(app, message):
             username = False
         text = 'Your task is to briefly analyze this chat.'
         typing_task = await gen_typing(app, chat_id, True)
-        history = await get_messages(chat_id)
-        resp = await gpt_request(text, "", history, {"chat_link_id": chat_link_id, "type": {"username": username}}, media_file=False)
-        await message.reply(resp)
-        await gen_typing(app, chat_id, typing_task)
+        try:
+            history = await get_messages(chat_id)
+            resp = await gpt_request(text, "", history, {"chat_link_id": chat_link_id, "type": {"username": username}}, media_file=False)
+            await message.reply(resp)
+        except Exception as e:
+            await message.reply("📛 Error in analyzing the group.")
+            logging.error(f"Error in analyzing the group: {e}")
+        finally:
+            await gen_typing(app, chat_id, typing_task)
     else:
         await message.reply("Function available only in gemini.")
 
