@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:python3.12-alpine AS builder
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
 
 WORKDIR /app
 
@@ -7,9 +7,9 @@ COPY pyproject.toml uv.lock /app
 RUN uv sync --no-cache
 
 
-FROM python:3.12-alpine AS main
+FROM python:3.12-slim-bookworm AS main
 
-RUN apk add --no-cache file pango
+RUN apt-get update && apt-get install -y libcairo2 file libpango-1.0-0 && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
