@@ -28,13 +28,16 @@ async def gen_typing(app, chat_id, typing_task):
         except asyncio.CancelledError:
             pass
 
-def convert_tgs_to_video(tgs_file: str):
-    out_path = tempfile.mktemp(suffix=".mp4")
-    with open(tgs_file, "rb") as file:
-        lottie_animation = parse_tgs(file)
-    lottie_animation.frame_rate = 30
-    export_video(lottie_animation, out_path, format="mp4")
-    return out_path
+async def convert_tgs_to_video(tgs_file: str):
+    loop = asyncio.get_event_loop()
+    def _convert_tgs_to_video_sync(_tgs_file: str):
+        out_path = tempfile.mktemp(suffix=".mp4")
+        with open(_tgs_file, "rb") as file:
+            lottie_animation = parse_tgs(file)
+        lottie_animation.frame_rate = 30
+        export_video(lottie_animation, out_path, format="mp4")
+        return out_path
+    return await loop.run_in_executor(None, _convert_tgs_to_video_sync, tgs_file)
 
 async def process_queue(app, chat_id, genai=False):
     processed_first_photo = {}
@@ -60,7 +63,7 @@ async def process_queue(app, chat_id, genai=False):
                     logging.debug(f"{cid}: download media file")
                     await msg.download(temp_file.name)
                     if msg.sticker and msg.sticker.is_animated:
-                        media = convert_tgs_to_video(temp_file.name)
+                        media = await convert_tgs_to_video(temp_file.name)
                     else:
                         media = temp_file.name
                     query = f"Send media: {media} text: {caption}"
