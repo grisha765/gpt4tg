@@ -1,5 +1,7 @@
 import asyncio, re, tempfile, os
 from pyrogram.enums import ChatAction, ParseMode
+from lottie.parsers.tgs import parse_tgs
+from lottie.exporters.video import export_video
 from db.chat import save_message
 from config.config import Config
 from config import logging_config
@@ -26,12 +28,13 @@ async def gen_typing(app, chat_id, typing_task):
         except asyncio.CancelledError:
             pass
 
-def convert_tgs_to_gif(tgs_file: str, gif_file: str):
-    from lottie.exporters.gif import export_gif
-    from lottie.parsers.tgs import parse_tgs
+def convert_tgs_to_video(tgs_file: str):
+    out_path = tempfile.mktemp(suffix=".mp4")
     with open(tgs_file, "rb") as file:
         lottie_animation = parse_tgs(file)
-    export_gif(lottie_animation, gif_file, skip_frames=30)
+    lottie_animation.frame_rate = 30
+    export_video(lottie_animation, out_path, format="mp4")
+    return out_path
 
 async def process_queue(app, chat_id, genai=False):
     processed_first_photo = {}
@@ -57,9 +60,10 @@ async def process_queue(app, chat_id, genai=False):
                     logging.debug(f"{cid}: download media file")
                     await msg.download(temp_file.name)
                     if msg.sticker and msg.sticker.is_animated:
-                        convert_tgs_to_gif(temp_file.name, temp_file.name)
-                    query = f"Send media: {temp_file.name} text: {caption}"
-                    media = temp_file.name
+                        media = convert_tgs_to_video(temp_file.name)
+                    else:
+                        media = temp_file.name
+                    query = f"Send media: {media} text: {caption}"
             else:
                 from models.gpt import gpt_request
             r = await gpt_request(query, user_role, history=conversations[cid]["history"], systemprompt=system_prompt, media_file=media) #type: ignore
@@ -82,6 +86,8 @@ async def process_queue(app, chat_id, genai=False):
                     if os.path.exists(temp_file.name): #type: ignore
                         logging.debug(f"{cid}: remove media file")
                         os.remove(temp_file.name) #type: ignore
+                    if os.path.exists(media):
+                        os.remove(media) #type: ignore
 
     del processing_tasks[chat_id]
 
