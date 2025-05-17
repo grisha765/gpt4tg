@@ -84,7 +84,7 @@ async def process_queue(app, chat_id, genai=False):
         finally:
             await gen_typing(app, chat_id, typing_task)
             if genai:
-                if msg.photo or msg.animation or msg.sticker:
+                if msg.photo or msg.animation or msg.sticker or msg.voice:
                     temp_file.close() #type: ignore
                     if os.path.exists(temp_file.name): #type: ignore
                         logging.debug(f"{cid}: remove media file")
