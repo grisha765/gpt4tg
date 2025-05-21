@@ -89,7 +89,7 @@ async def process_queue(app, chat_id, genai=False):
                     if os.path.exists(temp_file.name): #type: ignore
                         logging.debug(f"{cid}: remove media file")
                         os.remove(temp_file.name) #type: ignore
-                    if os.path.exists(media):
+                    if media and os.path.exists(media):
                         os.remove(media) #type: ignore
 
     del processing_tasks[chat_id]
