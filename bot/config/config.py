@@ -6,6 +6,10 @@ class Config:
     tg_hash: str = 'b6b154c3707471f5339bd661645ed3d6'
     tg_token: str = 'None'
     db_path: str = 'data.db'
+    model_name: str = ''
+    api_key: str = ''
+    openai_base_url: str = 'https://openrouter.ai/api/v1'
+    retries: int = 10
 
     @classmethod
     def load_from_env(cls):
