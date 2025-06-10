@@ -1,5 +1,5 @@
 import logging, os
-from config.config import Config
+from bot.config.config import Config
 
 RESET = "\x1b[0m"
 WHITE = "\x1b[0m"

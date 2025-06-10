@@ -1,6 +1,7 @@
 import re
-from db.models import UserName
+from bot.db.models import UserName
 from tortoise.exceptions import DoesNotExist
+
 
 async def set_username(user_id: int, username: str) -> bool:
     if not (5 <= len(username) <= 32):
@@ -36,6 +37,7 @@ async def check_username(user_id: int):
     except DoesNotExist:
         return False
 
+
 async def reset_username(user_id: int) -> bool:
     try:
         user_record = await UserName.get(user_id=user_id)
@@ -43,6 +45,7 @@ async def reset_username(user_id: int) -> bool:
         return True
     except DoesNotExist:
         return False
+
 
 if __name__ == "__main__":
     raise RuntimeError("This module should be run only via main.py")

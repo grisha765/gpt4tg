@@ -5,17 +5,12 @@ description = "Implementation of the gpt4free project and gemini as telegram bot
 readme = "readme.md"
 requires-python = ">=3.12"
 dependencies = [
-    "aiohttp>=3.11.12",
-    "cairosvg>=2.7.1",
-    "lottie>=0.7.1",
-    "opencv-python-headless>=4.11.0.86",
-    "pillow>=11.1.0",
-    "pyrofork>=2.3.58",
-    "python-magic>=0.4.27",
+    "pyrofork>=2.3.64",
     "tgcrypto-pyrofork>=1.2.7",
-    "tortoise-orm>=0.24.0",
+    "tortoise-orm>=0.25.1",
 ]
 
 [tool.pyright]
 venvPath = '.'
 venv = '.venv'
+

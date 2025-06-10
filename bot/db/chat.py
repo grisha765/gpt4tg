@@ -1,9 +1,16 @@
-from db.models import Chat
+from bot.db.models import Chat
 from tortoise.exceptions import IntegrityError
 
 MAX_MESSAGES_PER_CHAT = 1000
 
-async def save_message(chat_id: int, message_id: int, username: str, message_text: str, reply_to_message_id: int = None) -> bool:
+
+async def save_message(
+        chat_id: int,
+        message_id: int,
+        username: str,
+        message_text: str,
+        reply_to_message_id: int = 0
+) -> bool:
     try:
         messages_count = await Chat.filter(chat_id=chat_id).count()
 
@@ -22,6 +29,7 @@ async def save_message(chat_id: int, message_id: int, username: str, message_tex
         return True
     except IntegrityError:
         return False
+
 
 async def get_messages(chat_id: int):
     messages = await Chat.filter(chat_id=chat_id).order_by("message_id")
@@ -44,6 +52,7 @@ async def get_messages(chat_id: int):
         }
         for msg in messages
     ]
+
 
 if __name__ == "__main__":
     raise RuntimeError("This module should be run only via main.py")

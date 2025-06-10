@@ -1,4 +1,4 @@
-from db.models import ActivateGroup
+from bot.db.models import ActivateGroup
 from tortoise.exceptions import DoesNotExist
 
 async def add_group(chat_id: int, password: str):
@@ -6,6 +6,7 @@ async def add_group(chat_id: int, password: str):
         chat_id=chat_id,
         defaults={"activated": False, "password": password}
     )
+
 
 async def activate_group(chat_id: int, password: str) -> bool:
     try:
@@ -18,6 +19,7 @@ async def activate_group(chat_id: int, password: str) -> bool:
             return False
     except DoesNotExist:
         return False
+
 
 async def check_group(chat_id: int) -> dict:
     try:

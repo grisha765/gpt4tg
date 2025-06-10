@@ -6,14 +6,6 @@ class Config:
     tg_hash: str = 'b6b154c3707471f5339bd661645ed3d6'
     tg_token: str = 'None'
     db_path: str = 'data.db'
-    api_ip: str = '127.0.0.1'
-    api_port: str = '1337'
-    gpt_model: str = 'gpt-4o-mini'
-    gpt_provider: str = 'DDG'
-    gpt_tokens: int = 1024
-    gpt_temperature: float = 0.7
-    chat_msg_storage: int = 10
-    genai_api: list = []
 
     @classmethod
     def load_from_env(cls):
@@ -21,7 +13,9 @@ class Config:
             env_value = os.getenv(key.upper())
             if env_value is not None:
                 current_value = getattr(cls, key)
-                if isinstance(current_value, int):
+                if isinstance(current_value, bool):
+                    setattr(cls, key, env_value.lower() in ('true', '1', 'yes'))
+                elif isinstance(current_value, int):
                     setattr(cls, key, int(env_value))
                 elif isinstance(current_value, float):
                     setattr(cls, key, float(env_value))
