@@ -1,6 +1,7 @@
 from bot.db.models import ActivateGroup
 from tortoise.exceptions import DoesNotExist
 
+
 async def add_group(chat_id: int, password: str):
     await ActivateGroup.get_or_create(
         chat_id=chat_id,
@@ -27,6 +28,7 @@ async def check_group(chat_id: int) -> dict:
         return {"activated": group.activated, "password": group.password}
     except DoesNotExist:
         return {"activated": False, "password": None}
+
 
 if __name__ == "__main__":
     raise RuntimeError("This module should be run only via main.py")
