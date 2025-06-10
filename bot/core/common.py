@@ -16,6 +16,7 @@ class Common:
     message_id_hist = {}
     model: pydantic_ai.models.Model
     agent: pydantic_ai.Agent
+    binary = pydantic_ai.BinaryContent
     openai_model = pydantic_ai.models.openai.OpenAIModel
     openai_provider = pydantic_ai.providers.openai.OpenAIProvider
     gemini_model = pydantic_ai.models.gemini.GeminiModel

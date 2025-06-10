@@ -86,7 +86,7 @@ async def reply(client, message):
     request = f"{username}: [{text.strip()}]"
     typing_task = await gen_typing(client, message.chat.id, True)
     try:
-        await continue_chat(message, request)
+        await continue_chat(client, message, request)
     except Exception as e:
         logging.error(f"{message.chat.id}: {e}")
     finally:
