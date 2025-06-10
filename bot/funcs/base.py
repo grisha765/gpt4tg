@@ -16,6 +16,9 @@ from bot.core.common import (
     safe_call,
     gen_typing
 )
+from bot.config import logging_config
+logging = logging_config.setup_logging(__name__)
+
 
 async def new_chat_member(client, message):
     chat_id = message.chat.id
@@ -60,12 +63,16 @@ Please enter text after the /gpt command. Example:
     else:
         request = f"{username}: [{''.join(text[1:]).strip()}]"
         typing_task = await gen_typing(client, message.chat.id, True)
-        await init_chat(message, request)
-        await gen_typing(client, message.chat.id, typing_task)
+        try:
+            await init_chat(message, request)
+        except Exception as e:
+            logging.error(f"{message.chat.id}: {e}")
+        finally:
+            await gen_typing(client, message.chat.id, typing_task)
 
 
 async def reply(client, message):
-    text = message.text
+    text = (message.text or message.caption or "")
     username = await check_username(message.from_user.id)
     if username:
         username = username
@@ -76,10 +83,14 @@ async def reply(client, message):
         )
         username = await check_username(message.from_user.id)
 
-    request = f"{username}: [{text}]"
+    request = f"{username}: [{text.strip()}]"
     typing_task = await gen_typing(client, message.chat.id, True)
-    await continue_chat(message, request)
-    await gen_typing(client, message.chat.id, typing_task)
+    try:
+        await continue_chat(message, request)
+    except Exception as e:
+        logging.error(f"{message.chat.id}: {e}")
+    finally:
+        await gen_typing(client, message.chat.id, typing_task)
 
 if __name__ == "__main__":
     raise RuntimeError("This module should be run only via main.py")
