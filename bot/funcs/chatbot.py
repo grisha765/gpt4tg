@@ -3,6 +3,7 @@ from bot.core.common import (
     Common,
     safe_call
 )
+from pydantic_ai.messages import ModelRequest, SystemPromptPart
 from bot.config import logging_config
 logging = logging_config.setup_logging(__name__)
 
@@ -55,7 +56,13 @@ def format_message_history(messages):
 def gen_session(chat_id):
     session_id = uuid.uuid4().hex[:12]
     Common.message_bot_hist[(chat_id, session_id)] = {
-        "history": []
+        "history": [
+            ModelRequest(
+                parts=[
+                    SystemPromptPart(content=Common.system_prompt)
+                ]
+            )
+        ]
     }
     logging.debug(f"{chat_id}: session {session_id} generated")
     return session_id, Common.message_bot_hist[(chat_id, session_id)]["history"]
@@ -71,11 +78,18 @@ async def result(text, history, media=None):
     return response
 
 
-async def init_chat(message, text):
+async def init_chat(message, text, system_prompt=None):
     chat_id = message.chat.id
     session_id, message_history = gen_session(chat_id)
     logging.debug(f"{chat_id} - {session_id}: response - {text}")
+    if system_prompt:
+        message_history[0].parts.append(
+            SystemPromptPart(content=system_prompt)
+        )
+        logging.debug(f"{chat_id} - {session_id}: system prompt - {system_prompt}")
+
     response = await result(text, message_history)
+    
     logging.debug(f"{chat_id} - {session_id}: message history: {format_message_history(message_history)}")
     msg = await safe_call(
         message.reply,

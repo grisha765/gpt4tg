@@ -1,3 +1,4 @@
+import re
 from pyrogram.enums import ParseMode
 from bot.funcs.activate import (
     generate_password,
@@ -61,10 +62,17 @@ Please enter text after the /gpt command. Example:
         args = parts[1:]
         await command_handler(message, username, command, args)
     else:
-        request = f"{username}: [{''.join(text[1:]).strip()}]"
+        pattern = r"\{([^}]*)\}\s*(.*)"
+        text = ''.join(text[1:]).strip()
+        system_prompt = None
+        match = re.match(pattern, text)
+        if match:
+            system_prompt = match.group(1).strip()
+            text = match.group(2).strip()
+        request = f"{username}: [{text}]"
         typing_task = await gen_typing(client, message.chat.id, True)
         try:
-            await init_chat(message, request)
+            await init_chat(message, request, system_prompt)
         except Exception as e:
             logging.error(f"{message.chat.id}: {e}")
         finally:
