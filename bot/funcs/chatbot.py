@@ -7,6 +7,51 @@ from bot.config import logging_config
 logging = logging_config.setup_logging(__name__)
 
 
+def format_message_history(messages):
+    def _format_content(obj):
+        if hasattr(obj, "media_type"):
+            mime = getattr(obj, "media_type", "unknown")
+            return f"[binary content: {mime}]"
+        if isinstance(obj, list):
+            return "[" + ", ".join(_format_content(item) for item in obj) + "]"
+        return str(obj)
+    def _handle_response(response):
+        lines = []
+        for part in getattr(response, "parts", []):
+            role = "Assistant"
+            if hasattr(part, "media_type"):
+                content_line = _format_content(part)
+            else:
+                raw_content = getattr(part, "content", "")
+                content_line = _format_content(raw_content)
+            lines.append(f"{role}: {content_line}")
+        return lines
+    def _handle_request(request):
+        lines = []
+        for part in getattr(request, "parts", []):
+            role = part.__class__.__name__.replace("PromptPart", "").lower()
+            role = role.capitalize()
+            if hasattr(part, "media_type"):
+                content_line = _format_content(part)
+            else:
+                raw_content = getattr(part, "content", "")
+                content_line = _format_content(raw_content)
+            if role == "System" and len(content_line) > 160:
+                content_line = f"{content_line[:80]}...\n{content_line[-80:]}"
+            lines.append(f"{role}: {content_line}")
+        return lines
+    readable_lines = []
+    for message in messages:
+        message_type = message.__class__.__name__
+        if message_type == "ModelRequest":
+            readable_lines.extend(_handle_request(message))
+        elif message_type == "ModelResponse":
+            readable_lines.extend(_handle_response(message))
+        else:
+            readable_lines.append(f"Unknown message type: {message_type}")
+    return "\n".join(readable_lines)
+
+
 def gen_session(chat_id):
     session_id = uuid.uuid4().hex[:12]
     Common.message_bot_hist[(chat_id, session_id)] = {
@@ -31,7 +76,7 @@ async def init_chat(message, text):
     session_id, message_history = gen_session(chat_id)
     logging.debug(f"{chat_id} - {session_id}: response - {text}")
     response = await result(text, message_history)
-    logging.debug(f"{chat_id} - {session_id}: message history: {message_history}")
+    logging.debug(f"{chat_id} - {session_id}: message history: {format_message_history(message_history)}")
     msg = await safe_call(
         message.reply,
         text=response
@@ -88,7 +133,7 @@ async def continue_chat(client, message, text):
 
     response = await result(**result_dict)
 
-    logging.debug(f"{chat_id} - {session_id}: message history: {message_history}")
+    logging.debug(f"{chat_id} - {session_id}: message history: {format_message_history(message_history)}")
     msg = await safe_call(
         message.reply,
         text=response
