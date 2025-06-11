@@ -37,7 +37,7 @@ async def request(client, message):
     if len(text) <= 1:
         info_text = """
 Please enter text after the /gpt command. Example:
-<code>/gpt Tell me a joke.</code> - Create a virtual chat and start communicating with the bot.
+<code>/gpt {You're the joker who tells funny jokes.} Tell me a joke.</code> - Create a virtual chat and start communicating with the bot.
 <code>/gpt !setname new_username</code> - Change username.
         """
         await safe_call(
