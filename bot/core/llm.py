@@ -23,7 +23,6 @@ async def init_llm():
         )
     Common.agent = pydantic_ai.Agent(
         Common.model,
-        system_prompt=Common.system_prompt,
         retries=Config.retries
     )
 
