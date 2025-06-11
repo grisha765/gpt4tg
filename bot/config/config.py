@@ -7,7 +7,7 @@ class Config:
     tg_token: str = 'None'
     db_path: str = 'data.db'
     model_name: str = ''
-    api_key: str = ''
+    api_key: list = []
     openai_base_url: str = 'https://openrouter.ai/api/v1'
     retries: int = 10
 
@@ -24,7 +24,7 @@ class Config:
                 elif isinstance(current_value, float):
                     setattr(cls, key, float(env_value))
                 elif isinstance(current_value, list):
-                    setattr(cls, key, env_value.split(","))
+                    setattr(cls, key, env_value.replace(" ", "").split(","))
                 else:
                     setattr(cls, key, env_value)
 

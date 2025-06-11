@@ -1,4 +1,5 @@
 import asyncio, httpx
+from itertools import cycle
 from typing import cast
 from pathlib import Path
 from pyrogram.errors import FloodWait
@@ -7,6 +8,8 @@ import pydantic_ai.models.openai
 import pydantic_ai.providers.openai
 import pydantic_ai.models.gemini
 import pydantic_ai.providers.google_gla
+from bot.config import logging_config
+logging = logging_config.setup_logging(__name__)
 
 
 class Common:
@@ -23,6 +26,19 @@ class Common:
     gemini_provider = pydantic_ai.providers.google_gla.GoogleGLAProvider
     prompt_file = Path('bot') / 'config' / 'prompt.txt'
     system_prompt = prompt_file.read_text(encoding='utf-8')
+
+
+class RotatingKeyClient(httpx.AsyncClient):
+    def __init__(self, keys, **kwargs):
+        kwargs.setdefault("timeout", Common.client_timeout)
+        hooks = kwargs.setdefault("event_hooks", {})
+        hooks.setdefault("request", []).append(self._add_header)
+        self._keys = cycle(keys)
+        super().__init__(**kwargs)
+    async def _add_header(self, request: httpx.Request):
+        key = next(self._keys)
+        logging.debug(f"Use api key: ...{key[-4:]}")
+        request.headers["X-Goog-Api-Key"] = key
 
 
 async def safe_call(func, *args, **kwargs):

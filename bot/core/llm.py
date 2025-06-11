@@ -1,5 +1,5 @@
 import pydantic_ai
-from bot.core.common import Common
+from bot.core.common import Common, RotatingKeyClient
 from bot.config.config import Config
 
 
@@ -8,15 +8,15 @@ async def init_llm():
         Common.model = Common.gemini_model(
             model_name=Config.model_name,
             provider=Common.gemini_provider(
-                api_key=Config.api_key,
-                http_client=Common.client_agent
+                api_key='dummy',
+                http_client=RotatingKeyClient(Config.api_key)
             ),
         )
     else:
         Common.model = Common.openai_model(
             model_name=Config.model_name,
             provider=Common.openai_provider(
-                api_key=Config.api_key,
+                api_key=Config.api_key[0],
                 base_url=Config.openai_base_url,
                 http_client=Common.client_agent
             ),
