@@ -4,6 +4,7 @@ from bot.core.common import (
     safe_call
 )
 from pydantic_ai.messages import ModelRequest, SystemPromptPart
+from bot.config.config import Config
 from bot.config import logging_config
 logging = logging_config.setup_logging(__name__)
 
@@ -72,10 +73,16 @@ async def result(text, history, media=None):
     llm_msg = [text]
     if media:
         llm_msg.append(media)
-    result = await Common.agent.run(llm_msg, message_history=history)
-    response = result.output
-    history.extend(result.new_messages())
-    return response
+    for attempt, _ in enumerate(Config.api_key, start=1):
+        try:
+            result = await Common.agent.run(llm_msg, message_history=history)
+            response = result.output
+            history.extend(result.new_messages())
+            return response
+        except:
+            logging.warning(f"An error occurred during attempt {attempt}.")
+            if attempt == len(Config.api_key):
+                raise
 
 
 async def init_chat(message, text, system_prompt=None):
