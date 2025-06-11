@@ -24,6 +24,8 @@ class Common:
     openai_model = pydantic_ai.models.openai.OpenAIModel
     openai_provider = pydantic_ai.providers.openai.OpenAIProvider
     gemini_model = pydantic_ai.models.gemini.GeminiModel
+    gemini_model_settings = pydantic_ai.models.gemini.GeminiModelSettings
+    gemini_model_safety_settings = pydantic_ai.models.gemini.GeminiSafetySettings
     gemini_provider = pydantic_ai.providers.google_gla.GoogleGLAProvider
     prompt_file = Path('bot') / 'config' / 'prompt.txt'
     system_prompt = prompt_file.read_text(encoding='utf-8')
