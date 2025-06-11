@@ -1,4 +1,4 @@
-import asyncio, httpx
+import asyncio, httpx, collections
 from itertools import cycle
 from typing import cast
 from pathlib import Path
@@ -17,6 +17,7 @@ class Common:
     client_agent = httpx.AsyncClient(timeout=client_timeout)
     message_bot_hist = {}
     message_id_hist = {}
+    locks = collections.defaultdict(asyncio.Lock)
     model: pydantic_ai.models.Model
     agent: pydantic_ai.Agent
     binary = pydantic_ai.BinaryContent

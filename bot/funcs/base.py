@@ -14,6 +14,7 @@ from bot.db.username import (
     check_username
 )
 from bot.core.common import (
+    Common,
     safe_call,
     gen_typing
 )
@@ -62,21 +63,22 @@ Please enter text after the /gpt command. Example:
         args = parts[1:]
         await command_handler(message, username, command, args)
     else:
-        pattern = r"\{([^}]*)\}\s*(.*)"
-        text = ''.join(text[1:]).strip()
-        system_prompt = None
-        match = re.match(pattern, text)
-        if match:
-            system_prompt = match.group(1).strip()
-            text = match.group(2).strip()
-        request = f"{username}: [{text}]"
-        typing_task = await gen_typing(client, message.chat.id, True)
-        try:
-            await init_chat(message, request, system_prompt)
-        except Exception as e:
-            logging.error(f"{message.chat.id}: {e}")
-        finally:
-            await gen_typing(client, message.chat.id, typing_task)
+        async with Common.locks[message.chat.id]:
+            pattern = r"\{([^}]*)\}\s*(.*)"
+            text = ''.join(text[1:]).strip()
+            system_prompt = None
+            match = re.match(pattern, text)
+            if match:
+                system_prompt = match.group(1).strip()
+                text = match.group(2).strip()
+            request = f"{username}: [{text}]"
+            typing_task = await gen_typing(client, message.chat.id, True)
+            try:
+                await init_chat(message, request, system_prompt)
+            except Exception as e:
+                logging.error(f"{message.chat.id}: {e}")
+            finally:
+                await gen_typing(client, message.chat.id, typing_task)
 
 
 async def reply(client, message):
@@ -91,14 +93,16 @@ async def reply(client, message):
         )
         username = await check_username(message.from_user.id)
 
-    request = f"{username}: [{text.strip()}]"
-    typing_task = await gen_typing(client, message.chat.id, True)
-    try:
-        await continue_chat(client, message, request)
-    except Exception as e:
-        logging.error(f"{message.chat.id}: {e}")
-    finally:
-        await gen_typing(client, message.chat.id, typing_task)
+    async with Common.locks[message.chat.id]:
+        request = f"{username}: [{text.strip()}]"
+        typing_task = await gen_typing(client, message.chat.id, True)
+        try:
+            await continue_chat(client, message, request)
+        except Exception as e:
+            logging.error(f"{message.chat.id}: {e}")
+        finally:
+            await gen_typing(client, message.chat.id, typing_task)
+
 
 if __name__ == "__main__":
     raise RuntimeError("This module should be run only via main.py")
