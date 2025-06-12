@@ -9,6 +9,7 @@ class Config:
     model_name: str = ''
     api_key: list = []
     openai_base_url: str = ''
+    history_limit: int = 10
     retries: int = 10
 
     @classmethod

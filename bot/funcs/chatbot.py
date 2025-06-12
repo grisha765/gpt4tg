@@ -1,5 +1,5 @@
-import uuid, textwrap
-import pyrogram.errors
+import uuid, textwrap, pyrogram.errors
+from collections import deque
 from bot.core.common import (
     Common,
     safe_call
@@ -40,7 +40,7 @@ def format_message_history(messages):
                 raw_content = getattr(part, "content", "")
                 content_line = _format_content(raw_content)
             if role == "System" and len(content_line) > 160:
-                content_line = f"{content_line[:80]}...\n{content_line[-80:]}"
+                content_line = f"{content_line[:80]}... ...{content_line[-80:]}"
             lines.append(f"{role}: {content_line}")
         return lines
     readable_lines = []
@@ -58,25 +58,29 @@ def format_message_history(messages):
 def gen_session(chat_id):
     session_id = uuid.uuid4().hex[:12]
     Common.message_bot_hist[(chat_id, session_id)] = {
-        "history": [
+        "system_prompt": [
             ModelRequest(
                 parts=[
                     SystemPromptPart(content=Common.system_prompt)
                 ]
             )
-        ]
+        ],
+        "history": deque(maxlen=Config.history_limit)
     }
     logging.debug(f"{chat_id}: session {session_id} generated")
-    return session_id, Common.message_bot_hist[(chat_id, session_id)]["history"]
+    return (session_id,
+            Common.message_bot_hist[(chat_id, session_id)]["system_prompt"],
+            Common.message_bot_hist[(chat_id, session_id)]["history"]
+            )
 
 
-async def result(text, history, media=None):
+async def result(text, system_prompt, history, media=None):
     llm_msg = [text]
     if media:
         llm_msg.append(media)
     for attempt, _ in enumerate(Config.api_key, start=1):
         try:
-            result = await Common.agent.run(llm_msg, message_history=history)
+            result = await Common.agent.run(llm_msg, message_history=[*system_prompt, *history])
             response = result.output
             history.extend(result.new_messages())
             return response
@@ -88,17 +92,17 @@ async def result(text, history, media=None):
 
 async def init_chat(message, text, system_prompt=None):
     chat_id = message.chat.id
-    session_id, message_history = gen_session(chat_id)
+    session_id, history_prompt, message_history = gen_session(chat_id)
     logging.debug(f"{chat_id} - {session_id}: response - {text}")
     if system_prompt:
-        message_history[0].parts.append(
+        history_prompt[0].parts.append(
             SystemPromptPart(content=system_prompt)
         )
         logging.debug(f"{chat_id} - {session_id}: system prompt - {system_prompt}")
 
-    response = await result(text, message_history)
+    response = await result(text, history_prompt, message_history)
     
-    logging.debug(f"{chat_id} - {session_id}: message history: {format_message_history(message_history)}")
+    logging.debug(f"{chat_id} - {session_id}: message history: {format_message_history([*history_prompt, *message_history])}")
     try:
         msg = await safe_call(
             message.reply,
@@ -162,13 +166,15 @@ async def continue_chat(client, message, text):
         result_dict['media'] = Common.binary(data=byte_stream.getvalue(),media_type=mime_type)
 
     logging.debug(f"{chat_id} - {session_id}: response - {text}")
+    history_prompt = Common.message_bot_hist[(chat_id, session_id)].get("system_prompt")
     message_history = Common.message_bot_hist[(chat_id, session_id)].get("history")
     result_dict['text'] = text
+    result_dict['system_prompt'] = history_prompt
     result_dict['history'] = message_history
 
     response = await result(**result_dict)
 
-    logging.debug(f"{chat_id} - {session_id}: message history: {format_message_history(message_history)}")
+    logging.debug(f"{chat_id} - {session_id}: message history: {format_message_history([*history_prompt, *message_history])}")
     try:
         msg = await safe_call(
             message.reply,
