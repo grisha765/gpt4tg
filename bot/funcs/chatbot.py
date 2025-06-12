@@ -56,14 +56,23 @@ def format_message_history(messages):
 
 
 def prepare(text: str) -> str:
-    pattern = re.compile(r"<think>(.*?)</think>", re.DOTALL)
-    if not pattern.search(text):
-        logging.debug("Answer without thinking, skip")
-        return text
-    def to_quote(match: re.Match) -> str:
-        inside = match.group(1).strip()
-        return "\n".join(f"**> {line}" for line in inside.splitlines())
-    return pattern.sub(to_quote, text)
+    think_open  = "<think>"
+    think_close = "</think>"
+    pattern = re.compile(rf"{think_open}(.*?){think_close}", re.DOTALL)
+    if pattern.search(text):
+        logging.debug("Thinking found in the text")
+        def to_quote(match: re.Match) -> str:
+            inside = match.group(1).strip()
+            return "\n".join(f"**> {line}" for line in inside.splitlines())
+        return pattern.sub(to_quote, text)
+    elif think_close in text:
+        logging.debug("Thinking completion found in the text")
+        inside, rest = text.split(think_close, 1)
+        inside = inside.strip()
+        quoted = "\n".join(f"**> {line}" for line in inside.splitlines())
+        return quoted + rest
+    logging.debug("Thinking not found, skip")
+    return text
 
 
 def gen_session(chat_id):
