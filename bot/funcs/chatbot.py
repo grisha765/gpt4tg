@@ -62,7 +62,7 @@ def prepare(text: str) -> str:
         return text
     def to_quote(match: re.Match) -> str:
         inside = match.group(1).strip()
-        return "\n".join(f"> {line}" for line in inside.splitlines())
+        return "\n".join(f"**> {line}" for line in inside.splitlines())
     return pattern.sub(to_quote, text)
 
 
