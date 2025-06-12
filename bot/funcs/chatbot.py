@@ -1,4 +1,5 @@
-import uuid
+import uuid, textwrap
+import pyrogram.errors
 from bot.core.common import (
     Common,
     safe_call
@@ -98,11 +99,24 @@ async def init_chat(message, text, system_prompt=None):
     response = await result(text, message_history)
     
     logging.debug(f"{chat_id} - {session_id}: message history: {format_message_history(message_history)}")
-    msg = await safe_call(
-        message.reply,
-        text=response
-    )
-    Common.message_id_hist[(chat_id, msg.id)] = session_id
+    try:
+        msg = await safe_call(
+            message.reply,
+            text=response
+        )
+        Common.message_id_hist[(chat_id, msg.id)] = session_id
+    except pyrogram.errors.MessageTooLong:
+        for chunk in textwrap.wrap(
+            str(response),
+            4096,
+            break_long_words=False,
+            replace_whitespace=False
+        ):
+            msg = await safe_call(
+                message.reply,
+                text=chunk
+            )
+            Common.message_id_hist[(chat_id, msg.id)] = session_id
 
 
 async def continue_chat(client, message, text):
@@ -155,11 +169,24 @@ async def continue_chat(client, message, text):
     response = await result(**result_dict)
 
     logging.debug(f"{chat_id} - {session_id}: message history: {format_message_history(message_history)}")
-    msg = await safe_call(
-        message.reply,
-        text=response
-    )
-    Common.message_id_hist[(chat_id, msg.id)] = session_id
+    try:
+        msg = await safe_call(
+            message.reply,
+            text=response
+        )
+        Common.message_id_hist[(chat_id, msg.id)] = session_id
+    except pyrogram.errors.MessageTooLong:
+        for chunk in textwrap.wrap(
+            str(response),
+            4096,
+            break_long_words=False,
+            replace_whitespace=False
+        ):
+            msg = await safe_call(
+                message.reply,
+                text=chunk
+            )
+            Common.message_id_hist[(chat_id, msg.id)] = session_id
 
 
 if __name__ == "__main__":
