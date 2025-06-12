@@ -8,7 +8,7 @@ class Config:
     db_path: str = 'data.db'
     model_name: str = ''
     api_key: list = []
-    openai_base_url: str = 'https://openrouter.ai/api/v1'
+    openai_base_url: str = ''
     retries: int = 10
 
     @classmethod

@@ -5,11 +5,10 @@ from bot.config.config import Config
 
 
 async def init_llm():
-    use_gemini = 'gemini' in Config.model_name.lower()
     agent_kwargs: dict[str, Any] = {
         'retries': Config.retries,
     }
-    if use_gemini:
+    if not Config.openai_base_url:
         Common.model = Common.gemini_model(
             model_name=Config.model_name,
             provider=Common.gemini_provider(
