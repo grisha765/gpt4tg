@@ -1,4 +1,4 @@
-import uuid, textwrap, pyrogram.errors
+import uuid, textwrap, pyrogram.errors, re
 from collections import deque
 from bot.core.common import (
     Common,
@@ -55,6 +55,17 @@ def format_message_history(messages):
     return "\n".join(readable_lines)
 
 
+def prepare(text: str) -> str:
+    pattern = re.compile(r"<think>(.*?)</think>", re.DOTALL)
+    if not pattern.search(text):
+        logging.debug("Answer without thinking, skip")
+        return text
+    def to_quote(match: re.Match) -> str:
+        inside = match.group(1).strip()
+        return "\n".join(f"> {line}" for line in inside.splitlines())
+    return pattern.sub(to_quote, text)
+
+
 def gen_session(chat_id):
     session_id = uuid.uuid4().hex[:12]
     Common.message_bot_hist[(chat_id, session_id)] = {
@@ -81,7 +92,7 @@ async def result(text, system_prompt, history, media=None):
     for attempt, _ in enumerate(Config.api_key, start=1):
         try:
             result = await Common.agent.run(llm_msg, message_history=[*system_prompt, *history])
-            response = result.output
+            response = prepare(result.output)
             history.extend(result.new_messages())
             return response
         except:
