@@ -31,7 +31,7 @@ class Common:
     system_prompt = prompt_file.read_text(encoding='utf-8')
 
 
-class RotatingKeyClient(httpx.AsyncClient):
+class RotatingGeminiKeyClient(httpx.AsyncClient):
     def __init__(self, keys, **kwargs):
         kwargs.setdefault("timeout", Common.client_timeout)
         hooks = kwargs.setdefault("event_hooks", {})
@@ -40,8 +40,22 @@ class RotatingKeyClient(httpx.AsyncClient):
         super().__init__(**kwargs)
     async def _add_header(self, request: httpx.Request):
         key = next(self._keys)
-        logging.debug(f"Use api key: ...{key[-4:]}")
+        logging.debug(f"Use Gemini api key: ...{key[-4:]}")
         request.headers["X-Goog-Api-Key"] = key
+
+
+class RotatingOpenAIKeyClient(httpx.AsyncClient):
+    def __init__(self, keys, **kwargs):
+        kwargs.setdefault("timeout", Common.client_timeout)
+        hooks = kwargs.setdefault("event_hooks", {})
+        hooks.setdefault("request", []).append(self._add_header)
+        self._keys = cycle(keys)
+        super().__init__(**kwargs)
+    async def _add_header(self, request: httpx.Request):
+        key = next(self._keys)
+        logging.debug(f"Use OpenAI api key: ...{key[-4:]}")
+        request.headers.pop("Authorization", None)
+        request.headers["Authorization"] = f"Bearer {key}"
 
 
 async def safe_call(func, *args, **kwargs):

@@ -1,6 +1,10 @@
 import pydantic_ai
 from typing import Any, Literal, cast
-from bot.core.common import Common, RotatingKeyClient
+from bot.core.common import (
+    Common,
+    RotatingGeminiKeyClient,
+    RotatingOpenAIKeyClient
+)
 from bot.config.config import Config
 
 
@@ -13,7 +17,7 @@ async def init_llm():
             model_name=Config.model_name,
             provider=Common.gemini_provider(
                 api_key='dummy',
-                http_client=RotatingKeyClient(Config.api_key)
+                http_client=RotatingGeminiKeyClient(Config.api_key)
             ),
         )
         categories = (
@@ -46,9 +50,9 @@ async def init_llm():
         Common.model = Common.openai_model(
             model_name=Config.model_name,
             provider=Common.openai_provider(
-                api_key=Config.api_key[0],
+                api_key="dummy",
                 base_url=Config.openai_base_url,
-                http_client=Common.client_agent
+                http_client=RotatingOpenAIKeyClient(Config.api_key)
             ),
         )
     Common.agent = pydantic_ai.Agent(
