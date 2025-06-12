@@ -41,11 +41,14 @@ async def request(client, message):
 Please enter text after the /gpt command. Example:
 <code>/gpt {You're the joker who tells funny jokes.} Tell me a joke.</code> - Create a virtual chat and start communicating with the bot.
 <code>/gpt !setname new_username</code> - Change username.
+
+<a href="https://github.com/grisha765/gpt4tg">View Source Code</a>
         """
         await safe_call(
             message.reply,
             text=info_text,
-            parse_mode=ParseMode.HTML
+            parse_mode=ParseMode.HTML,
+            disable_web_page_preview=True
         )
         return
     username = await check_username(message.from_user.id)
