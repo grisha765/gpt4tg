@@ -1,5 +1,6 @@
 import re
 from pyrogram.enums import ParseMode
+from pydantic_ai.exceptions import ModelHTTPError
 from bot.funcs.activate import (
     generate_password,
     activate_chat
@@ -75,6 +76,12 @@ Please enter text after the /gpt command. Example:
             typing_task = await gen_typing(client, message.chat.id, True)
             try:
                 await init_chat(message, request, system_prompt)
+            except ModelHTTPError as e:
+                logging.error(f"{message.chat.id}: Agent error on http request {e.status_code}, {e.body}")
+                await safe_call(
+                    message.reply,
+                    text=f"Agent error on http request `{e.status_code}`"
+                )
             except Exception as e:
                 logging.error(f"{message.chat.id}: {e}")
             finally:
@@ -98,6 +105,12 @@ async def reply(client, message):
         typing_task = await gen_typing(client, message.chat.id, True)
         try:
             await continue_chat(client, message, request)
+        except ModelHTTPError as e:
+            logging.error(f"{message.chat.id}: Agent error on http request {e.status_code}, {e.body}")
+            await safe_call(
+                message.reply,
+                text=f"Agent error on http request `{e.status_code}`"
+            )
         except Exception as e:
             logging.error(f"{message.chat.id}: {e}")
         finally:
