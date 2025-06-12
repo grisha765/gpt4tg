@@ -55,6 +55,7 @@ The following environment variables control the startup of the project:
 | `MODEL_NAME`      | *string*                            | Name of the LLM model to use (`gpt-3.5-turbo`, `gemini-2.0-flash`) |
 | `API_KEY`         | *comma-separated*                   | API keys for the LLM providers                                     |
 | `OPENAI_BASE_URL` | *string*                            | Custom OpenAI API base URL (optional)                              |
+| `HISTORY_LIMIT`   | *integer*                           | Size of the message history in each session (default `10`)         |
 
 ## Basic Bot Commands
 
