@@ -35,6 +35,7 @@ async def activate_group(client, message):
 
 
 async def request(client, message):
+    user = message.from_user
     text = message.text.split(maxsplit=1)
     if len(text) <= 1:
         info_text = """
@@ -51,15 +52,15 @@ Please enter text after the /gpt command. Example:
             disable_web_page_preview=True
         )
         return
-    username = await check_username(message.from_user.id)
+    username = await check_username(user.id)
     if username:
         username = username
     else:
         await set_username(
-            message.from_user.id,
-            message.from_user.username if message.from_user.username else message.from_user.first_name
+            user.id,
+            user.username if user.username else user.first_name
         )
-        username = await check_username(message.from_user.id)
+        username = await check_username(user.id)
 
     if text[1].startswith("!"):
         parts = text[1].split(" ", 1)
@@ -92,16 +93,17 @@ Please enter text after the /gpt command. Example:
 
 
 async def reply(client, message):
+    user = message.from_user
     text = (message.text or message.caption or "")
-    username = await check_username(message.from_user.id)
+    username = await check_username(user.id)
     if username:
         username = username
     else:
         await set_username(
-            message.from_user.id,
-            message.from_user.username if message.from_user.username else message.from_user.first_name
+            user.id,
+            user.username if user.username else user.first_name
         )
-        username = await check_username(message.from_user.id)
+        username = await check_username(user.id)
 
     async with Common.locks[message.chat.id]:
         request = f"{username}: [{text.strip()}]"
