@@ -30,6 +30,7 @@ def init_handlers(app):
             request,
             pyrogram.filters.command("gpt") &
                 pyrogram.filters.group &
+                pyrogram.filters.incoming &
                 activated_filter
         )
     )
@@ -39,6 +40,7 @@ def init_handlers(app):
             ~ pyrogram.filters.command("gpt") &
                 pyrogram.filters.group &
                 pyrogram.filters.reply &
+                pyrogram.filters.incoming &
                 activated_filter
         )
     )
