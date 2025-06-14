@@ -30,6 +30,7 @@ class Common:
     gemini_provider = pydantic_ai.providers.google_gla.GoogleGLAProvider
     prompt_file = Path('bot') / 'config' / 'prompt.txt'
     system_prompt = prompt_file.read_text(encoding='utf-8')
+    tmp_path = Path("/tmp")
 
 
 class RotatingGeminiKeyClient(httpx.AsyncClient):

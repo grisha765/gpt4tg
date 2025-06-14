@@ -4,13 +4,16 @@ from bot.core.common import (
     Common,
     safe_call
 )
-from pydantic_ai.messages import ModelRequest, SystemPromptPart
+from pydantic_ai.messages import (
+    ModelRequest,
+    SystemPromptPart
+)
 from bot.config.config import Config
 from bot.config import logging_config
 logging = logging_config.setup_logging(__name__)
 
 
-def format_message_history(messages):
+def format_message_history(messages, session_id):
     def _format_content(obj):
         if hasattr(obj, "media_type"):
             mime = getattr(obj, "media_type", "unknown")
@@ -52,7 +55,22 @@ def format_message_history(messages):
             readable_lines.extend(_handle_response(message))
         else:
             readable_lines.append(f"Unknown message type: {message_type}")
-    return "\n".join(readable_lines)
+    new_content = "\n".join(readable_lines)
+    log_path = Common.tmp_path / f"{session_id}.log"
+    if log_path.exists():
+        old_content = log_path.read_text(encoding='utf-8')
+        if new_content.startswith(old_content):
+            to_append = new_content[len(old_content):]
+            if to_append.startswith("\n"):
+                to_append = to_append[1:]
+            if to_append:
+                with log_path.open("a", encoding="utf-8") as f:
+                    f.write("\n" + to_append)
+        else:
+            log_path.write_text(new_content, encoding='utf-8')
+    else:
+        log_path.write_text(new_content, encoding='utf-8')
+    return new_content
 
 
 def prepare(text: str) -> str:
@@ -121,8 +139,12 @@ async def init_chat(message, text, system_prompt=None):
         logging.debug(f"{chat_id} - {session_id}: system prompt - {system_prompt}")
 
     response = await result(text, history_prompt, message_history)
-    
-    logging.debug(f"{chat_id} - {session_id}: message history: {format_message_history([*history_prompt, *message_history])}")
+
+    log_history = format_message_history(
+        [*history_prompt, *message_history],
+        session_id
+    )
+   #logging.debug(f"{chat_id} - {session_id}: message history: {log_history}")
     try:
         msg = await safe_call(
             message.reply,
@@ -201,7 +223,11 @@ async def continue_chat(client, message, text):
 
     response = await result(**result_dict)
 
-    logging.debug(f"{chat_id} - {session_id}: message history: {format_message_history([*history_prompt, *message_history])}")
+    log_history = format_message_history(
+        [*history_prompt, *message_history],
+        session_id
+    )
+   #logging.debug(f"{chat_id} - {session_id}: message history: {log_history}")
     try:
         msg = await safe_call(
             message.reply,
