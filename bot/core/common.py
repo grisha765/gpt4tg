@@ -1,4 +1,4 @@
-import asyncio, httpx, collections
+import asyncio, httpx, collections, ssl, certifi, html2text
 from itertools import cycle
 from typing import cast
 from pathlib import Path
@@ -15,6 +15,8 @@ logging = logging_config.setup_logging(__name__)
 class Common:
     client_timeout = httpx.Timeout(30.0)
     client_agent = httpx.AsyncClient(timeout=client_timeout)
+    ctx = ssl.create_default_context(cafile=certifi.where())
+    client_ssl = httpx.AsyncClient(verify=ctx, timeout=client_timeout)
     message_bot_hist = {}
     processed_first_media = {}
     message_id_hist = {}
@@ -32,6 +34,8 @@ class Common:
     system_prompt = prompt_file.read_text(encoding='utf-8')
     tmp_path = Path("/tmp")
     file_size_limit_bytes = config.Config.file_size_limit * 1024 * 1024
+    converter = html2text.HTML2Text()
+
 
 
 class RotatingGeminiKeyClient(httpx.AsyncClient):
