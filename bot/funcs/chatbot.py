@@ -153,6 +153,13 @@ async def continue_chat(client, message, text):
     result_dict = {}
     thumb = None
     if message.media:
+        if message.media_group_id:
+            media_group = await message.get_media_group()
+            if Common.processed_first_media.get(message.media_group_id):
+                logging.debug(f"{chat_id} - {session_id}: skipping subsequent media")
+                return
+            Common.processed_first_media[message.media_group_id] = True
+            message = media_group[0]
         mime_type = "application/octet-stream"
         if message.document and message.document.mime_type:
             mime_type = message.document.mime_type

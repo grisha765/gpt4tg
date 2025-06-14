@@ -16,6 +16,7 @@ class Common:
     client_timeout = httpx.Timeout(30.0)
     client_agent = httpx.AsyncClient(timeout=client_timeout)
     message_bot_hist = {}
+    processed_first_media = {}
     message_id_hist = {}
     locks = collections.defaultdict(asyncio.Lock)
     model: pydantic_ai.models.Model
