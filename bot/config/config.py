@@ -12,6 +12,7 @@ class Config:
     history_limit: int = 10
     retries: int = 10
     file_size_limit: int = 10
+    api_url_4get: str = 'https://4get.ch/api/v1/web'
 
     @classmethod
     def load_from_env(cls):
