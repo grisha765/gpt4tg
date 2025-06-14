@@ -298,6 +298,7 @@ name = "gpt4tg"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "html2text" },
     { name = "pydantic-ai" },
     { name = "pyrofork" },
     { name = "tgcrypto-pyrofork" },
@@ -306,6 +307,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "html2text", specifier = ">=2025.4.15" },
     { name = "pydantic-ai", specifier = ">=0.2.16" },
     { name = "pyrofork", specifier = ">=2.3.64" },
     { name = "tgcrypto-pyrofork", specifier = ">=1.2.7" },
@@ -363,6 +365,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/47/8b/5cd399a92b47d98086f55fc72d69bc9ea5e5c6f27a9ed3e0cdd6be4e58a3/hf_xet-1.1.3-cp37-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:30c575a5306f8e6fda37edb866762140a435037365eba7a17ce7bd0bc0216a8b", size = 5283017, upload-time = "2025-06-04T00:47:23.239Z" },
     { url = "https://files.pythonhosted.org/packages/53/e3/2fcec58d2fcfd25ff07feb876f466cfa11f8dcf9d3b742c07fe9dd51ee0a/hf_xet-1.1.3-cp37-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:7c1a6aa6abed1f696f8099aa9796ca04c9ee778a58728a115607de9cc4638ff1", size = 4970349, upload-time = "2025-06-04T00:47:25.383Z" },
     { url = "https://files.pythonhosted.org/packages/53/bf/10ca917e335861101017ff46044c90e517b574fbb37219347b83be1952f6/hf_xet-1.1.3-cp37-abi3-win_amd64.whl", hash = "sha256:b578ae5ac9c056296bb0df9d018e597c8dc6390c5266f35b5c44696003cde9f3", size = 2310934, upload-time = "2025-06-04T00:47:29.632Z" },
+]
+
+[[package]]
+name = "html2text"
+version = "2025.4.15"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f8/27/e158d86ba1e82967cc2f790b0cb02030d4a8bef58e0c79a8590e9678107f/html2text-2025.4.15.tar.gz", hash = "sha256:948a645f8f0bc3abe7fd587019a2197a12436cd73d0d4908af95bfc8da337588", size = 64316, upload-time = "2025-04-15T04:02:30.045Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1d/84/1a0f9555fd5f2b1c924ff932d99b40a0f8a6b12f6dd625e2a47f415b00ea/html2text-2025.4.15-py3-none-any.whl", hash = "sha256:00569167ffdab3d7767a4cdf589b7f57e777a5ed28d12907d8c58769ec734acc", size = 34656, upload-time = "2025-04-15T04:02:28.44Z" },
 ]
 
 [[package]]
@@ -1065,6 +1076,8 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/50/14/cbc4e69afce5f9216f8c52b2387d3a736b420d8aefab8d3d1430f2173fbd/TgCrypto_pyrofork-1.2.7-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:f865d5f0f41e0c34f1ba2573dbc664086f1f5259ec09d24cca8992b5fa261982", size = 60215, upload-time = "2024-10-08T09:33:32.513Z" },
     { url = "https://files.pythonhosted.org/packages/5f/f8/4ef2dd105693788b39785b0ccc8c800e01e80ae996fdeb02608c18b15bff/TgCrypto_pyrofork-1.2.7-cp313-cp313-win32.whl", hash = "sha256:9974ba74bac28074776a1c16ef66026ca0448665876b568c70011bddbd9c33b2", size = 45077, upload-time = "2024-10-08T08:17:10.192Z" },
     { url = "https://files.pythonhosted.org/packages/83/15/dba4c5c9299b0ca1b2f0ef8e4e4be02a79e3ce1efeecb05562c9ac98ff2f/TgCrypto_pyrofork-1.2.7-cp313-cp313-win_amd64.whl", hash = "sha256:5dd7251a43990216790590ec22f56169b4be3ba87c8d3591c56111d5f94f0898", size = 45677, upload-time = "2024-10-08T08:17:11.59Z" },
+    { url = "https://files.pythonhosted.org/packages/91/05/6d0c012ad343a18f1fa662bb79e34b8c3bef793561e481a6497ff94f6959/tgcrypto_pyrofork-1.2.7-cp312-cp312-win_arm64.whl", hash = "sha256:e9e84d2dccb71626c9ed2910485b71bb48c4d1a1f77fdcf3c0e7ff71f3aaa223", size = 44450, upload-time = "2025-06-13T08:03:25.552Z" },
+    { url = "https://files.pythonhosted.org/packages/e3/7c/cee613918645062381fc3d8696b37e60dc87996f25e320fed10949dcd950/tgcrypto_pyrofork-1.2.7-cp313-cp313-win_arm64.whl", hash = "sha256:8e7fbda182d0fcdcfad002903ae8c139dbb796cd3f595d447edcb42255b65e81", size = 44441, upload-time = "2025-06-13T08:03:27.25Z" },
 ]
 
 [[package]]

@@ -5,6 +5,7 @@ description = "Implementation of the gpt4free project and gemini as telegram bot
 readme = "readme.md"
 requires-python = ">=3.12"
 dependencies = [
+    "html2text>=2025.4.15",
     "pydantic-ai>=0.2.16",
     "pyrofork>=2.3.64",
     "tgcrypto-pyrofork>=1.2.7",
