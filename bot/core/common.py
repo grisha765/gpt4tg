@@ -8,7 +8,7 @@ import pydantic_ai.models.openai
 import pydantic_ai.providers.openai
 import pydantic_ai.models.gemini
 import pydantic_ai.providers.google_gla
-from bot.config import logging_config
+from bot.config import logging_config, config
 logging = logging_config.setup_logging(__name__)
 
 
@@ -31,6 +31,7 @@ class Common:
     prompt_file = Path('bot') / 'config' / 'prompt.txt'
     system_prompt = prompt_file.read_text(encoding='utf-8')
     tmp_path = Path("/tmp")
+    file_size_limit_bytes = config.Config.file_size_limit * 1024 * 1024
 
 
 class RotatingGeminiKeyClient(httpx.AsyncClient):

@@ -175,6 +175,7 @@ async def continue_chat(client, message, text):
     result_dict = {}
     thumb = None
     byte_stream = None
+    file_size = None
     if message.media:
         if message.media_group_id:
             media_group = await message.get_media_group()
@@ -186,19 +187,27 @@ async def continue_chat(client, message, text):
         mime_type = "application/octet-stream"
         if message.document and message.document.mime_type:
             mime_type = message.document.mime_type
+            file_size = message.document.file_size
         elif message.photo:
             mime_type = "image/jpeg"
+            file_size = message.photo.file_size
         elif message.audio:
             mime_type = "audio/mpeg"
+            file_size = message.audio.file_size
         elif message.voice:
             mime_type = "audio/ogg"
+            file_size = message.voice.file_size
         elif message.video:
             mime_type = "video/mp4"
+            file_size = message.video.file_size
         elif message.video_note:
             mime_type = "video/mp4"
+            file_size = message.video_note.file_size
         elif message.animation:
             mime_type = "video/mp4"
+            file_size = message.animation.file_size
         elif message.sticker:
+            file_size = message.sticker.file_size
             if message.sticker.is_animated:
                 thumb = message.sticker.thumbs[0]
                 mime_type="image/webp"
@@ -206,6 +215,17 @@ async def continue_chat(client, message, text):
                 mime_type = "video/mp4"
             else:
                 mime_type = "image/webp"
+        logging.debug(f"{chat_id} - {session_id}: file size - {file_size} byte")
+        if file_size is not None and file_size > Common.file_size_limit_bytes:
+            logging.debug(f"{chat_id} - {session_id}: file size - {file_size} byte larger than the {Common.file_size_limit_bytes} byte limit")
+            await safe_call(
+                message.reply,
+                text=(
+                    "The file size limit has been exceeded."
+                    f"\nMaximum size: {Config.file_size_limit} mb."
+                )
+            )
+            return
         if thumb:
             byte_stream = await client.download_media(thumb.file_id, in_memory=True)
             byte_stream.seek(0)

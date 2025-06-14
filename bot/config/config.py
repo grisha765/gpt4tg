@@ -11,6 +11,7 @@ class Config:
     openai_base_url: str = ''
     history_limit: int = 10
     retries: int = 10
+    file_size_limit: int = 10
 
     @classmethod
     def load_from_env(cls):
