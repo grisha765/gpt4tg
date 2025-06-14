@@ -5,6 +5,11 @@ from bot.core.common import (
     RotatingGeminiKeyClient,
     RotatingOpenAIKeyClient
 )
+from bot.tools.web_search import google_search
+from bot.tools.fetch_url import (
+        open_url,
+        open_url_find
+)
 from bot.config.config import Config
 
 
@@ -57,6 +62,11 @@ async def init_llm():
         )
     Common.agent = pydantic_ai.Agent(
         Common.model,
+        tools=[
+            pydantic_ai.Tool(google_search),
+            pydantic_ai.Tool(open_url),
+            pydantic_ai.Tool(open_url_find)
+        ],
         **agent_kwargs
     )
 
