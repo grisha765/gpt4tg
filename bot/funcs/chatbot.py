@@ -174,6 +174,7 @@ async def continue_chat(client, message, text):
 
     result_dict = {}
     thumb = None
+    byte_stream = None
     if message.media:
         if message.media_group_id:
             media_group = await message.get_media_group()
@@ -246,6 +247,13 @@ async def continue_chat(client, message, text):
                 text=chunk
             )
             Common.message_id_hist[(chat_id, msg.id)] = session_id
+    finally:
+        if byte_stream:
+            byte_stream.close()
+            del byte_stream
+            logging.debug(f"{chat_id} - {session_id}: byte stream is closed")
+        if 'media' in result_dict:
+            del result_dict['media']
 
 
 if __name__ == "__main__":
