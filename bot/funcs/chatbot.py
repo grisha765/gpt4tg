@@ -1,4 +1,4 @@
-import uuid, textwrap, pyrogram.errors, re
+import uuid, textwrap, pyrogram.errors, re, json
 from collections import deque
 from bot.core.common import (
     Common,
@@ -20,30 +20,52 @@ def format_message_history(messages, session_id):
             return f"[binary content: {mime}]"
         if isinstance(obj, list):
             return "[" + ", ".join(_format_content(item) for item in obj) + "]"
+        if isinstance(obj, dict):
+            return json.dumps(obj, ensure_ascii=False)
         return str(obj)
     def _handle_response(response):
         lines = []
         for part in getattr(response, "parts", []):
-            role = "Assistant"
-            if hasattr(part, "media_type"):
-                content_line = _format_content(part)
-            else:
-                raw_content = getattr(part, "content", "")
+            if part.__class__.__name__ == "ToolCallPart":
+                role = f"ToolCall({getattr(part, 'tool_name', 'unknown')})"
+                raw_content = getattr(part, "args", {})
                 content_line = _format_content(raw_content)
+            else:
+                role = "Assistant"
+                if hasattr(part, "media_type"):
+                    content_line = _format_content(part)
+                else:
+                    raw_content = getattr(part, "content", "")
+                    content_line = _format_content(raw_content)
             lines.append(f"{role}: {content_line}")
         return lines
     def _handle_request(request):
         lines = []
         for part in getattr(request, "parts", []):
-            role = part.__class__.__name__.replace("PromptPart", "").lower()
+            cls_name = part.__class__.__name__
+            role = cls_name.replace("PromptPart", "").replace("Part", "").lower()
             role = role.capitalize()
-            if hasattr(part, "media_type"):
-                content_line = _format_content(part)
-            else:
+
+            if cls_name == "ToolReturnPart":
+                role = f"ToolReturn({getattr(part, 'tool_name', 'unknown')})"
                 raw_content = getattr(part, "content", "")
                 content_line = _format_content(raw_content)
-            if role == "System" and len(content_line) > 160:
-                content_line = f"{content_line[:80]}... ...{content_line[-80:]}"
+                if len(content_line) > 160:
+                    content_line = (
+                        f"{content_line[:80]}... ..."
+                        f"{content_line[-80:]}"
+                    )
+            else:
+                if hasattr(part, "media_type"):
+                    content_line = _format_content(part)
+                else:
+                    raw_content = getattr(part, "content", "")
+                    content_line = _format_content(raw_content)
+                if role == "System" and len(content_line) > 160:
+                    content_line = (
+                        f"{content_line[:80]}... ..."
+                        f"{content_line[-80:]}"
+                    )
             lines.append(f"{role}: {content_line}")
         return lines
     readable_lines = []
@@ -58,18 +80,18 @@ def format_message_history(messages, session_id):
     new_content = "\n".join(readable_lines)
     log_path = Common.tmp_path / f"{session_id}.log"
     if log_path.exists():
-        old_content = log_path.read_text(encoding='utf-8')
+        old_content = log_path.read_text(encoding="utf-8")
         if new_content.startswith(old_content):
             to_append = new_content[len(old_content):]
             if to_append.startswith("\n"):
                 to_append = to_append[1:]
             if to_append:
-                with log_path.open("a", encoding="utf-8") as f:
-                    f.write("\n" + to_append)
+                with log_path.open("a", encoding="utf-8") as file:
+                    file.write("\n" + to_append)
         else:
-            log_path.write_text(new_content, encoding='utf-8')
+            log_path.write_text(new_content, encoding="utf-8")
     else:
-        log_path.write_text(new_content, encoding='utf-8')
+        log_path.write_text(new_content, encoding="utf-8")
     return new_content
 
 
