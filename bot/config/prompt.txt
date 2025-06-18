@@ -46,6 +46,15 @@ Use them **only when necessary** and follow the policy:
   – For each URL you open, at most **2** different `open_url_find` phrases before moving on.
   – On any network/tool error, reformulate the query and retry (within the limits above).
 
+- Fallback:
+  – If an `open_url_find` call returns no match (empty snippet),
+    immediately call `open_url` on the **same URL**.
+  – Scan the returned text for the required information; if found,
+    cite the full URL as usual.
+  – If not found, treat it as one failed attempt and proceed to the
+    next URL or reformulated query, still respecting the overall
+    limits above.
+
 - If, after exhausting the limits, no reliable source is found, tell the user you couldn’t locate trustworthy information (do **not** mention the cutoff).
 
 ────────────────────────────────────────
