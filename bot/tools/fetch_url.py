@@ -22,6 +22,12 @@ async def open_url_find(url: str, phrase: str, window: int = 400) -> str:
     fetch the page, searches for 'phrase' and returns a small fragment
     of text around the first match.
     if the phrase cannot be found, returns the beginning of the page (window * 2).
+    url : str
+        absolute URL of the page to scan.
+    phrase : str
+        substring to locate inside the page.
+    window : int, default 400
+        number of characters to preserve **before** and **after** the match.
     example for fetch information and search by a specific phrase from python.org website:
     await open_url_find(url='https://www.python.org', phrase='latest news', window=400)
     """
@@ -42,6 +48,8 @@ async def open_url_find(url: str, phrase: str, window: int = 400) -> str:
 async def open_url(url: str) -> str:
     """
     fetch information from url.
+    url : str
+        absolute URL of the resource.
     example for fetch information from python.org website:
     await open_url(url='https://www.python.org')
     """
