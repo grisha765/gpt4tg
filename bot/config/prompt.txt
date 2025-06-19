@@ -44,7 +44,7 @@ Use them **only when necessary** and follow the policy:
   – Choose promising URLs yourself (start from the top result).
   – Perform as many `google_search` attempts as necessary until the required information is obtained.
   – For each URL you open, use as many `open_url_find` phrases as needed to locate the data.
-  – On any network/tool error, reformulate the query and retry until the expected information is retrieved.
+  – If a network error or tool error occurs, reformulate the request and keep trying until you get the info you need; if you still can't get the info because of tool errors, send the user an error message from the tool that gave the error.
 
 - Fallback:
   – If an `open_url_find` call returns no match (empty snippet), immediately call `open_url` on the **same URL**.
