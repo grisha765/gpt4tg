@@ -3,11 +3,11 @@ from bot.db.models import UserName
 from tortoise.exceptions import DoesNotExist
 
 
-async def set_username(user_id: int, username: str) -> bool:
+async def set_username(user_id: int, username: str) -> dict:
     if not (5 <= len(username) <= 32):
-        return False
+        return {"status": False, "msg": "error_format"}
     if not re.fullmatch(r"[a-zа-яё0-9_]+", username, re.IGNORECASE):
-        return False
+        return {"status": False, "msg": "error_format"}
 
     existing_user = await UserName.filter(username=username).first()
 
@@ -16,7 +16,7 @@ async def set_username(user_id: int, username: str) -> bool:
             if existing_user.custom:
                 await existing_user.delete()
             else:
-                return False
+                return {"status": False, "msg": "username_taken"}
 
     user_record = await UserName.filter(user_id=user_id).first()
 
@@ -27,7 +27,7 @@ async def set_username(user_id: int, username: str) -> bool:
     else:
         await UserName.create(user_id=user_id, username=username, custom=False)
 
-    return True
+    return {"status": True}
 
 
 async def check_username(user_id: int):

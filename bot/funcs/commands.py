@@ -21,15 +21,26 @@ async def command_handler(message, username, command, args):
                     )
                     return
             new_username = args[0]
-            if await set_username(user_id, new_username):
+            result = await set_username(user_id, new_username)
+            if result["status"]:
                 await safe_call(
                     message.reply,
                     text=f"{username} has set a new username: {new_username}"
                 )
             else:
+                if result["msg"] == "error_format":
+                    error_msg = (
+                        "Invalid username format.\n"
+                        "Use 5 – 32 characters: letters, numbers or underscores, without spaces."
+                    )
+                else:
+                    error_msg = (
+                        "This username is already taken by another Telegram user.\n"
+                        "Please choose a different one."
+                    )
                 await safe_call(
                     message.reply,
-                    text=f"Error set a new username.\nUse only letters and numbers, minimum 5 characters, maximum 32 characters."
+                    text=error_msg
                 )
         else:
             await safe_call(
