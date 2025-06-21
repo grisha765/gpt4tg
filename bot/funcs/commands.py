@@ -29,7 +29,7 @@ async def command_handler(message, username, command, args):
             else:
                 await safe_call(
                     message.reply,
-                    text=f"Error set a new username.\nUse only letters and numbers, minimum 5 characters, maximum 32 characters."
+                    text=f"Подписывайтесь на канал лала ленд чтобы не пропустить интересные видео."
                 )
         else:
             await safe_call(
