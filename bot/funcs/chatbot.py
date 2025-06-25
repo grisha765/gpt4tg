@@ -1,5 +1,6 @@
 import uuid, textwrap, pyrogram.errors, re, json
 from collections import deque
+from pyrogram.enums import MessageMediaType
 from bot.core.common import (
     Common,
     safe_call
@@ -198,7 +199,7 @@ async def continue_chat(client, message, text):
     thumb = None
     byte_stream = None
     file_size = None
-    if message.media:
+    if message.media and message.media != MessageMediaType.WEB_PAGE_PREVIEW:
         if message.media_group_id:
             media_group = await message.get_media_group()
             if Common.processed_first_media.get(message.media_group_id):
